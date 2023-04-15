@@ -1,7 +1,7 @@
 # encoding: utf-8
 import time
 from torch.utils.data import DataLoader
-from dataset.lrw_dataset_preparation import LRWDatasetPreparation
+from dataset.preprocessing.lrw_dataset_preparation import LRWDatasetPreparation
 
 
 def main():

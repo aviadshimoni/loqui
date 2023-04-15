@@ -2,10 +2,9 @@
 import os
 import glob
 import torch
-import numpy as np
 import utils.utils as utils
-from os.path import join
-from dataset.lrw_dataset_interface import LRWDatasetInterface
+from os.path import join, dirname, realpath
+from interfaces.lrw_dataset_interface import LRWDatasetInterface
 
 
 class LRWDatasetPreparation(LRWDatasetInterface):
@@ -15,7 +14,7 @@ class LRWDatasetPreparation(LRWDatasetInterface):
     and generates training samples of LRW
     """
 
-    def __init__(self, dataset_prefix: str = os.path.dirname(os.path.realpath(__file__)),
+    def __init__(self, dataset_prefix: str = dirname(dirname(realpath(__file__))),
                  labels_path: str = "label_sorted.txt", target_dir: str = "lrw_roi_npy_gray_pkl_jpeg",
                  ensure_paths: bool = True) -> None:
         self.labels_path = labels_path
@@ -26,7 +25,7 @@ class LRWDatasetPreparation(LRWDatasetInterface):
         self.list = self.append_files()
 
         if self.ensure_paths:
-            utils.ensure_dir(target_dir)
+            utils.ensure_dir(join(self.dataset_prefix, target_dir))
 
     def set_labels(self) -> list:
         """

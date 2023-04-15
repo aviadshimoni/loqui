@@ -1,13 +1,12 @@
 # encoding: utf-8
-import os
 import glob
 import torch
 import numpy as np
 import utils.system_globals as sg
 import utils.augmenter as data_augmenter
-from os.path import join
 from turbojpeg import TJPF_GRAY
-from lrw_dataset_interface import LRWDatasetInterface
+from os.path import join, dirname, realpath
+from interfaces.lrw_dataset_interface import LRWDatasetInterface
 
 
 class LRWDataset(LRWDatasetInterface):
@@ -17,7 +16,7 @@ class LRWDataset(LRWDatasetInterface):
     and being used when training or testing the model
     """
 
-    def __init__(self, phase, args, dataset_prefix: str = os.path.dirname(os.path.realpath(__file__)),
+    def __init__(self, phase, args, dataset_prefix: str = join(dirname(dirname(realpath(__file__))), "dataset"),
                  labels_path: str = "label_sorted.txt") -> None:
         self.phase = phase  # train/val/test
         self.dataset_prefix = dataset_prefix
@@ -48,7 +47,7 @@ class LRWDataset(LRWDatasetInterface):
         lst = []
 
         for i, label in enumerate(self.labels):
-            files = glob.glob(join("lrw_roi_npy_gray_pkl_jpeg", label, self.phase, "*.pkl"))
+            files = glob.glob(join(self.dataset_prefix, "lrw_roi_npy_gray_pkl_jpeg", label, self.phase, "*.pkl"))
             files = sorted(files)
 
             lst += [file for file in files]
