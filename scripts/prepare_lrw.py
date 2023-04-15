@@ -8,7 +8,7 @@ def main():
     dataset = LRWDatasetPreparation()
     loader = DataLoader(dataset,
                         batch_size=1,
-                        num_workers=8,
+                        num_workers=1,
                         shuffle=False)
 
     start = time.time()

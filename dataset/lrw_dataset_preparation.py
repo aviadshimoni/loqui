@@ -72,7 +72,7 @@ class LRWDatasetPreparation(LRWDatasetInterface):
         labels = self.list[idx][1]
         result = {"video": inputs,
                   "label": int(labels),
-                  "duration": utils.load_duration(duration.replace(".mp4", ".txt")).astype(np.bool)}
+                  "duration": utils.load_duration(duration.replace(".mp4", ".txt")).astype(bool)}
 
         output = self.list[idx][0].replace("lrw_mp4", self.target_dir).replace(".mp4", ".pkl")
         torch.save(result, output)
