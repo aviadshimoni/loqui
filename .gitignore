@@ -1,0 +1,7 @@
+.idea/.gitignore
+.idea/
+*.pyc
+*.log
+dataset/lrw_mp4
+dataset/lrw_roi_npy_gray_pkl_jpeg
+venv
