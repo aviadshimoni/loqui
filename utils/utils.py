@@ -2,7 +2,7 @@
 import os
 import cv2
 import numpy as np
-import system_globals as sg
+import utils.system_globals as sg
 
 
 def ensure_dir(directory: str) -> None:

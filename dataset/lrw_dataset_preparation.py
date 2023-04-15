@@ -4,7 +4,8 @@ import glob
 import torch
 import numpy as np
 import utils.utils as utils
-from lrw_dataset_interface import LRWDatasetInterface
+from os.path import join
+from dataset.lrw_dataset_interface import LRWDatasetInterface
 
 
 class LRWDatasetPreparation(LRWDatasetInterface):
@@ -14,14 +15,15 @@ class LRWDatasetPreparation(LRWDatasetInterface):
     and generates training samples of LRW
     """
 
-    def __init__(self, labels_path: str = "label_sorted.txt",
-                 target_dir: str = "lrw_roi__npy_gray_pkl_jpeg",
+    def __init__(self, dataset_prefix: str = os.path.dirname(os.path.realpath(__file__)),
+                 labels_path: str = "label_sorted.txt", target_dir: str = "lrw_roi_npy_gray_pkl_jpeg",
                  ensure_paths: bool = True) -> None:
         self.labels_path = labels_path
         self.target_dir = target_dir
+        self.ensure_paths = ensure_paths
+        self.dataset_prefix = dataset_prefix
         self.labels = self.set_labels()
         self.list = self.append_files()
-        self.ensure_paths = ensure_paths
 
         if self.ensure_paths:
             utils.ensure_dir(target_dir)
@@ -32,7 +34,7 @@ class LRWDatasetPreparation(LRWDatasetInterface):
         :return: a list of labels
         """
 
-        with open(self.labels_path) as f:
+        with open(join(self.dataset_prefix, self.labels_path)) as f:
             return f.read().splitlines()
 
     def append_files(self) -> list:
@@ -44,7 +46,7 @@ class LRWDatasetPreparation(LRWDatasetInterface):
         lst = []
 
         for i, label in enumerate(self.labels):
-            files = glob.glob(os.path.join("lrw_mp4", label, '*', "*.mp4"))
+            files = glob.glob(join(self.dataset_prefix, "lrw_mp4", label, '*', "*.mp4"))
             for file in files:
                 file_to_save = file.replace("lrw_mp4", self.target_dir).replace(".mp4", ".pkl")
                 save_path = os.path.split(file_to_save)[0]
