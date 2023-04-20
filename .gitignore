@@ -3,5 +3,6 @@
 *.pyc
 *.log
 dataset/lrw_mp4
+service_account_key.json
 dataset/lrw_roi_npy_gray_pkl_jpeg
 venv
