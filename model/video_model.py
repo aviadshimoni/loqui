@@ -1,6 +1,6 @@
 # encoding: utf-8
 import torch.nn as nn
-from model import VideoCNN
+from model.video_cnn import VideoCNN
 from torch.cuda.amp import autocast
 
 
