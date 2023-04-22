@@ -1,22 +1,26 @@
 # encoding: utf-8
 import time
+import utils.utils
 import torch
 import torch.nn as nn
+from os.path import join, dirname, realpath
 from torch.cuda.amp import GradScaler
 from torch.utils.data import DataLoader
 from model.lrw_dataset import LRWDataset
 from model.video_model import VideoModel
+from model.model_validation import run_validation_set
 
 
-def train(batch_size: int, learning_rate: float, n_classes: int, epochs: int):
+def train(batch_size: int, num_workers: int, learning_rate: float, n_classes: int, epochs: int,
+          save_weights_prefix: str = dirname(realpath(__file__))):
     """
     Handle the model training
     """
 
     dataset = LRWDataset("train")
     loader = DataLoader(dataset,
-                        batch_size=1,
-                        num_workers=1,
+                        batch_size=batch_size,
+                        num_workers=num_workers,
                         shuffle=False,
                         pin_memory=True)
     iteration = 0
@@ -37,7 +41,7 @@ def train(batch_size: int, learning_rate: float, n_classes: int, epochs: int):
             y_v = video_model(video)
             loss_bp = loss_fn(y_v, label)
 
-            loss = {'CE V': loss_bp}
+            loss = {"CE V": loss_bp}
             optimizer.zero_grad()
             grad_scaler.scale(loss_bp).backward()
             grad_scaler.step(optimizer)
@@ -53,7 +57,16 @@ def train(batch_size: int, learning_rate: float, n_classes: int, epochs: int):
 
             print(summary)
 
-            #TODO get test info (accuracy, time etc) and update best accuracy if needed. if updated save weights
+            # if we are at the end of an epoch or at the very first start run validation set
+            if i == len(loader) - 1 or epoch == 0 and i == 0:
+                accuracy = run_validation_set(video_model, batch_size, num_workers)
+
+                if accuracy > best_accuracy:
+                    save_name = join(save_weights_prefix, f"train_iter_{iteration}_epoch_{epoch}_acc_{accuracy}.pt")
+                    utils.utils.ensure_dir(save_weights_prefix)
+                    torch.save({"video_model": video_model.module.state_dict()}, save_name)
+                    best_accuracy = accuracy
+
             iteration += 1
 
         scheduler.step()

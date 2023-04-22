@@ -1,9 +1,13 @@
 # coding: utf-8
 import math
 import torch.nn as nn
-import torchvision.models as models
+
 
 class BasicBlock(nn.Module):
+    """
+    TODO add documentation
+    """
+
     expansion = 1
 
     def __init__(self, inplanes, planes, stride=1, downsample=None, se=False):
@@ -17,7 +21,7 @@ class BasicBlock(nn.Module):
         self.stride = stride
         self.se = se
 
-        if (self.se):
+        if self.se:
             self.gap = nn.AdaptiveAvgPool2d(1)
             self.conv3 = nn.Conv2d(planes, planes // 16, kernel_size=1)
             self.conv4 = nn.Conv2d(planes // 16, planes, kernel_size=1)
@@ -33,7 +37,7 @@ class BasicBlock(nn.Module):
         if self.downsample is not None:
             residual = self.downsample(x)
 
-        if (self.se):
+        if self.se:
             w = self.gap(out)
             w = self.conv3(w)
             w = self.relu(w)
@@ -48,6 +52,10 @@ class BasicBlock(nn.Module):
 
 
 class ResNet(nn.Module):
+    """
+    TODO add documentation
+    """
+
     def __init__(self, block, layers, se=False):
         super(ResNet, self).__init__()
         self.inplanes = 64
@@ -72,8 +80,7 @@ class ResNet(nn.Module):
                 nn.BatchNorm2d(planes * block.expansion)
             )
 
-        layers = []
-        layers.append(block(self.inplanes, planes, stride, downsample, se=self.se))
+        layers = [block(self.inplanes, planes, stride, downsample, se=self.se)]
         self.inplanes = planes * block.expansion
 
         for _ in range(1, blocks):
@@ -89,6 +96,7 @@ class ResNet(nn.Module):
         x = self.avgpool(x)
         x = x.view(x.size(0), -1)
         x = self.bn(x)
+
         return x
 
     def _initialize_weights(self):
@@ -105,6 +113,10 @@ class ResNet(nn.Module):
 
 
 class VideoCNN(nn.Module):
+    """
+    TODO add documentation
+    """
+
     def __init__(self, se=False):
         super(VideoCNN, self).__init__()
 
@@ -130,12 +142,14 @@ class VideoCNN(nn.Module):
         x = x.contiguous()
         x = x.view(-1, 64, x.size(3), x.size(4))
         x = self.resnet18.forward(x)
+
         return x
 
     def forward(self, x):
         b, t = x.size()[:2]
         x = self.visual_frontend_forward(x)
         x = x.view(b, -1, 512)
+
         return x
 
     def _initialize_weights(self):
