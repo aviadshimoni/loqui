@@ -17,7 +17,7 @@ def train(batch_size: int, num_workers: int, learning_rate: float, n_classes: in
     Handle the model training
     """
 
-    dataset = LRWDataset("train")
+    dataset = LRWDataset("train", dataset_prefix="/tf/rois/")
     loader = DataLoader(dataset,
                         batch_size=batch_size,
                         num_workers=num_workers,
