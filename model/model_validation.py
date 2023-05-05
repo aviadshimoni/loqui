@@ -22,6 +22,7 @@ def run_validation_set(video_model: VideoModel, batch_size: int, num_workers: in
                             pin_memory=True)
         print(f"loader length: {len(loader)}")
         validation_accuracy = []
+        total = 0
 
         for i, inp in enumerate(loader):
             start_time = time.time()
