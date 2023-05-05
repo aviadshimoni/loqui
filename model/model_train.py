@@ -11,6 +11,15 @@ from model.video_model import VideoModel
 from model.model_validation import run_validation_set
 
 
+def parallel_model(model: VideoModel) -> nn.DataParallel:
+    """
+    Parallelize the application of the given module
+    """
+
+    model = nn.DataParallel(model)
+    return model
+
+
 def train(batch_size: int, num_workers: int, learning_rate: float, n_classes: int, epochs: int,
           save_weights_prefix: str = dirname(realpath(__file__))):
     """
@@ -31,6 +40,7 @@ def train(batch_size: int, num_workers: int, learning_rate: float, n_classes: in
     learning_rate = batch_size / 32.0 / torch.cuda.device_count() * learning_rate
     optimizer = torch.optim.Adam(video_model.parameters(), lr=learning_rate, weight_decay=1e-4)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs, eta_min=5e-6)
+    video_model = parallel_model(video_model)
 
     for epoch in range(epochs):
         for i, inp in enumerate(loader):
