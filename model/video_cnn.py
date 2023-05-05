@@ -10,7 +10,10 @@ class BasicBlock(nn.Module):
 
     expansion = 1
 
-    def __init__(self, inplanes, planes, stride=1, downsample=None, se=False):
+    def __init__(self, inplanes, planes, stride: int = 1, downsample=None, se: bool = False) -> None:
+        print(f"type of given inplanes inside BasicBlock init is: {type(inplanes)}")
+        print(f"type of given planes inside BasicBlock init is: {type(planes)}")
+        print(f"type of given downsample inside BasicBlock init is: {type(downsample)}")
         super().__init__()
         self.conv1 = nn.Conv2d(inplanes, planes, kernel_size=3, stride=stride, padding=1, bias=False)
         self.bn1 = nn.BatchNorm2d(planes)
@@ -27,6 +30,7 @@ class BasicBlock(nn.Module):
             self.conv4 = nn.Conv2d(planes // 16, planes, kernel_size=1)
 
     def forward(self, x):
+        print(f"type of given x inside BasicBlock forward is: {type(x)}")
         residual = x
         out = self.conv1(x)
         out = self.bn1(out)
@@ -47,7 +51,7 @@ class BasicBlock(nn.Module):
 
         out = out + residual
         out = self.relu(out)
-
+        print(f"type of returned out inside BasicBlock forward is: {type(out)}")
         return out
 
 
@@ -56,7 +60,9 @@ class ResNet(nn.Module):
     TODO add documentation
     """
 
-    def __init__(self, block, layers, se=False):
+    def __init__(self, block, layers, se: bool = False) -> None:
+        print(f"type of given block inside ResNet init is: {type(block)}")
+        print(f"type of given layers inside ResNet init is: {type(layers)}")
         super(ResNet, self).__init__()
         self.inplanes = 64
         self.se = se
@@ -71,7 +77,10 @@ class ResNet(nn.Module):
 
         self._initialize_weights()
 
-    def _make_layer(self, block, planes, blocks, stride=1):
+    def _make_layer(self, block, planes, blocks, stride: int = 1) -> nn.Sequential:
+        print(f"type of given block inside ResNet _make_layer is: {type(block)}")
+        print(f"type of given planes inside ResNet _make_layer is: {type(planes)}")
+        print(f"type of given blocks inside ResNet _make_layer is: {type(blocks)}")
         downsample = None
 
         if stride != 1 or self.inplanes != planes * block.expansion:
@@ -89,6 +98,7 @@ class ResNet(nn.Module):
         return nn.Sequential(*layers)
 
     def forward(self, x):
+        print(f"type of given x inside ResNet forward is: {type(x)}")
         x = self.layer1(x)
         x = self.layer2(x)
         x = self.layer3(x)
@@ -96,10 +106,10 @@ class ResNet(nn.Module):
         x = self.avgpool(x)
         x = x.view(x.size(0), -1)
         x = self.bn(x)
-
+        print(f"type of returned x inside ResNet forward is: {type(x)}")
         return x
 
-    def _initialize_weights(self):
+    def _initialize_weights(self) -> None:
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
                 n = m.kernel_size[0] * m.kernel_size[1] * m.out_channels
@@ -117,7 +127,7 @@ class VideoCNN(nn.Module):
     TODO add documentation
     """
 
-    def __init__(self, se=False):
+    def __init__(self, se: bool = False) -> None:
         super(VideoCNN, self).__init__()
 
         # frontend3D
@@ -136,23 +146,25 @@ class VideoCNN(nn.Module):
         self._initialize_weights()
 
     def visual_frontend_forward(self, x):
+        print(f"type of given x inside video_cnn visual is: {type(x)}")
         x = x.transpose(1, 2)
         x = self.frontend3D(x)
         x = x.transpose(1, 2)
         x = x.contiguous()
         x = x.view(-1, 64, x.size(3), x.size(4))
         x = self.resnet18.forward(x)
-
+        print(f"type of returned x inside video_cnn visual is: {type(x)}")
         return x
 
     def forward(self, x):
+        print(f"type of given x inside video_cnn is: {type(x)}")
         b, t = x.size()[:2]
         x = self.visual_frontend_forward(x)
         x = x.view(b, -1, 512)
-
+        print(f"type of returned x inside video_cnn is: {type(x)}")
         return x
 
-    def _initialize_weights(self):
+    def _initialize_weights(self) -> None:
         for m in self.modules():
             if isinstance(m, nn.Conv3d) or isinstance(m, nn.Conv2d) or isinstance(m, nn.Conv1d):
                 nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')

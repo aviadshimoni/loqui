@@ -9,7 +9,7 @@ class VideoModel(nn.Module):
     TODO add documentation
     """
 
-    def __init__(self, n_class: int, dropout: float = 0.5, training: bool = False):
+    def __init__(self, n_class: int, dropout: float = 0.5, training: bool = False) -> None:
         super(VideoModel, self).__init__()
         self.gru = nn.GRU(512, 1024, 3, batch_first=True, bidirectional=True, dropout=0.2)
         self.video_cnn = VideoCNN()
@@ -35,5 +35,6 @@ class VideoModel(nn.Module):
 
         h, _ = self.gru(f_v)
         y_v = self.v_cls(self.dropout(h)).mean(1)
-
+        print(f"type of v inside video_model is: {v}")
+        print(f"type of y_v inside video_model is: {y_v}")
         return y_v

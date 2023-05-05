@@ -21,7 +21,7 @@ def parallel_model(model: VideoModel) -> nn.DataParallel:
 
 
 def train(batch_size: int, num_workers: int, learning_rate: float, n_classes: int, epochs: int,
-          save_weights_prefix: str = dirname(realpath(__file__))):
+          save_weights_prefix: str = dirname(realpath(__file__))) -> None:
     """
     Handle the model training
     """

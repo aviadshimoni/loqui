@@ -7,7 +7,7 @@ from torch.utils.data import DataLoader
 from model.lrw_dataset import LRWDataset
 
 
-def run_validation_set(video_model: nn.DataParallel, batch_size: int, num_workers: int):
+def run_validation_set(video_model: nn.DataParallel, batch_size: int, num_workers: int) -> np.float64:
     """
     Evaluate the model by validation set
     """
@@ -43,7 +43,6 @@ def run_validation_set(video_model: nn.DataParallel, batch_size: int, num_worker
                 print(summary)
 
         accuracy = np.array(validation_accuracy).reshape(-1).mean()
-        print(f"type of accuracy is : {type(accuracy)}")
         summary = f"Validation accuracy: {np.array(validation_accuracy).reshape(-1).mean()}"
         print(summary)
 
