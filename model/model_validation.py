@@ -14,6 +14,7 @@ def run_validation_set(video_model: VideoModel, batch_size: int, num_workers: in
 
     with torch.no_grad():
         dataset = LRWDataset("val")
+        print(f"dataset object of validation set: {dataset}")
         loader = DataLoader(dataset,
                             batch_size=batch_size,
                             num_workers=num_workers,
@@ -26,9 +27,12 @@ def run_validation_set(video_model: VideoModel, batch_size: int, num_workers: in
             video_model.eval()
             video = inp.get("video").cuda(non_blocking=True)
             label = inp.get("label").cuda(non_blocking=True)
+            print(f"current label: {label}")
             total = total + video.size(0)
             y_v = video_model(video)
-            validation_accuracy.extend((y_v.argmax(-1) == label).cpu().numpy().tolist())
+            y_v_acc = (y_v.argmax(-1) == label).cpu().numpy().tolist()
+            print(f"y_v_acc that we extend to validation accuracy: {y_v_acc}")
+            validation_accuracy.extend(y_v_acc)
             end_time = time.time()
 
             if i % 10 == 0:
