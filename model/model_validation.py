@@ -13,7 +13,7 @@ def run_validation_set(video_model: VideoModel, batch_size: int, num_workers: in
     """
 
     with torch.no_grad():
-        dataset = LRWDataset("val")
+        dataset = LRWDataset("val", dataset_prefix="/tf/rois/")
         print(f"dataset object of validation set: {dataset}")
         loader = DataLoader(dataset,
                             batch_size=batch_size,
