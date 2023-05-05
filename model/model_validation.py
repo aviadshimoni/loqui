@@ -37,8 +37,7 @@ def run_validation_set(video_model: VideoModel, batch_size: int, num_workers: in
                 print(summary)
 
         accuracy = np.array(validation_accuracy).reshape(-1).mean()
-        summary = f"Validation accuracy: {np.array(validation_accuracy).reshape(-1).mean()}, " \
-                  f"ETA: {(end_time - start_time) * (len(loader) - i) / 3600.0}"
+        summary = f"Validation accuracy: {np.array(validation_accuracy).reshape(-1).mean()}"
         print(summary)
 
         return accuracy
