@@ -6,7 +6,9 @@ from torch.cuda.amp import autocast
 
 class VideoModel(nn.Module):
     """
-    TODO add documentation
+    The VideoModel class is a PyTorch nn.Module that consists of a video CNN and a GRU network.
+    The VideoModel class takes as input a batch of videos,
+    and outputs a tensor of shape (batch_size, n_class) containing the logits for each video in the batch.
     """
 
     def __init__(self, n_class: int, dropout: float = 0.5, training: bool = False) -> None:
@@ -19,7 +21,10 @@ class VideoModel(nn.Module):
 
     def forward(self, v):
         """
-        TODO add documentation
+        The output of the CNN is fed into a bidirectional GRU network with 1024 hidden units per direction, and 3 layers.
+        The GRU network outputs a tensor of shape (batch_size, seq_len, 2048).
+        The output of the GRU network is then fed into a linear layer with n_class output units,
+         which produces a tensor of shape (batch_size, n_class) containing the logits for each video in the batch.
         """
 
         self.gru.flatten_parameters()
@@ -35,6 +40,6 @@ class VideoModel(nn.Module):
 
         h, _ = self.gru(f_v)
         y_v = self.v_cls(self.dropout(h)).mean(1)
-        print(f"DEBUG: type of given v inside video_model forward func is: {v}")
+        print(f"DEBUG: type of given v inside video_model forward func is: {v.shape}")
         print(f"DEBUG: type of returned y_v inside video_model forward func is: {y_v}")
         return y_v

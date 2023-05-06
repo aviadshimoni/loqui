@@ -116,7 +116,9 @@ class ResNet(nn.Module):
 
 class VideoCNN(nn.Module):
     """
-    TODO add documentation
+    The VideoCNN is used to encode each frame of the input video into a feature vector of length 512.
+     The output of the CNN is a tensor of shape (batch_size, seq_len, 512),
+     where seq_len is the length of the video sequence (i.e. the number of frames in each video).
     """
 
     def __init__(self, se: bool = False) -> None:
