@@ -29,6 +29,8 @@ def run_validation_set(video_model: nn.DataParallel, batch_size: int, num_worker
             video_model.eval()
             video = inp.get("video").cuda(non_blocking=True)
             label = inp.get("label").cuda(non_blocking=True)
+            # The label tensor has a shape of (32,) which means it contains 32 labels for the 32 videos in the batch.
+            # Each label is an integer value that corresponds to the class of the video.
             print(f"current label: {label}")
             total = total + video.size(0)
             y_v = video_model(video)
