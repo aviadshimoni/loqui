@@ -41,5 +41,5 @@ class VideoModel(nn.Module):
         h, _ = self.gru(f_v)
         y_v = self.v_cls(self.dropout(h)).mean(1)
         print(f"DEBUG: type of given v inside video_model forward func is: {v.shape}")
-        print(f"DEBUG: type of returned y_v inside video_model forward func is: {y_v}")
+        print(f"DEBUG: type of returned y_v inside video_model forward func is: {y_v.shape}")
         return y_v
