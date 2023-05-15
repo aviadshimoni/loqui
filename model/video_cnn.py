@@ -1,5 +1,6 @@
 # coding: utf-8
 import math
+import torch
 import torch.nn as nn
 
 
@@ -10,7 +11,8 @@ class BasicBlock(nn.Module):
 
     expansion = 1
 
-    def __init__(self, inplanes, planes, stride=1, downsample=None, se=False):
+    def __init__(self, inplanes: int, planes: int, stride: int = 1, downsample: nn.modules.container.Sequential = None,
+                 se: bool = False) -> None:
         super().__init__()
         self.conv1 = nn.Conv2d(inplanes, planes, kernel_size=3, stride=stride, padding=1, bias=False)
         self.bn1 = nn.BatchNorm2d(planes)
@@ -26,7 +28,7 @@ class BasicBlock(nn.Module):
             self.conv3 = nn.Conv2d(planes, planes // 16, kernel_size=1)
             self.conv4 = nn.Conv2d(planes // 16, planes, kernel_size=1)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         residual = x
         out = self.conv1(x)
         out = self.bn1(out)
@@ -56,7 +58,7 @@ class ResNet(nn.Module):
     TODO add documentation
     """
 
-    def __init__(self, block, layers, se=False):
+    def __init__(self, block: nn.Module, layers: [], se: bool = False) -> None:
         super(ResNet, self).__init__()
         self.inplanes = 64
         self.se = se
@@ -71,7 +73,7 @@ class ResNet(nn.Module):
 
         self._initialize_weights()
 
-    def _make_layer(self, block, planes, blocks, stride=1):
+    def _make_layer(self, block: nn.Module, planes: int, blocks: int, stride: int = 1) -> nn.Sequential:
         downsample = None
 
         if stride != 1 or self.inplanes != planes * block.expansion:
@@ -88,7 +90,7 @@ class ResNet(nn.Module):
 
         return nn.Sequential(*layers)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.layer1(x)
         x = self.layer2(x)
         x = self.layer3(x)
@@ -99,7 +101,7 @@ class ResNet(nn.Module):
 
         return x
 
-    def _initialize_weights(self):
+    def _initialize_weights(self) -> None:
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
                 n = m.kernel_size[0] * m.kernel_size[1] * m.out_channels
@@ -114,10 +116,12 @@ class ResNet(nn.Module):
 
 class VideoCNN(nn.Module):
     """
-    TODO add documentation
+    The VideoCNN is used to encode each frame of the input video into a feature vector of length 512.
+     The output of the CNN is a tensor of shape (batch_size, seq_len, 512),
+     where seq_len is the length of the video sequence (i.e. the number of frames in each video).
     """
 
-    def __init__(self, se=False):
+    def __init__(self, se: bool = False) -> None:
         super(VideoCNN, self).__init__()
 
         # frontend3D
@@ -135,7 +139,7 @@ class VideoCNN(nn.Module):
         # initialize
         self._initialize_weights()
 
-    def visual_frontend_forward(self, x):
+    def visual_frontend_forward(self, x: torch.Tensor) -> torch.Tensor:
         x = x.transpose(1, 2)
         x = self.frontend3D(x)
         x = x.transpose(1, 2)
@@ -145,14 +149,14 @@ class VideoCNN(nn.Module):
 
         return x
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         b, t = x.size()[:2]
         x = self.visual_frontend_forward(x)
         x = x.view(b, -1, 512)
 
         return x
 
-    def _initialize_weights(self):
+    def _initialize_weights(self) -> None:
         for m in self.modules():
             if isinstance(m, nn.Conv3d) or isinstance(m, nn.Conv2d) or isinstance(m, nn.Conv1d):
                 nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')

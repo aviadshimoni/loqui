@@ -2,33 +2,41 @@
 import time
 import torch
 import numpy as np
+import torch.nn as nn
 from torch.utils.data import DataLoader
 from model.lrw_dataset import LRWDataset
-from model.video_model import VideoModel
 
 
-def run_validation_set(video_model: VideoModel, batch_size: int, num_workers: int):
+def run_validation_set(video_model: nn.DataParallel, batch_size: int, num_workers: int) -> np.float64:
     """
     Evaluate the model by validation set
     """
 
     with torch.no_grad():
-        dataset = LRWDataset("val")
+        dataset = LRWDataset("val", dataset_prefix="/tf/rois/")
+        print(f"dataset object of validation set: {dataset}")
         loader = DataLoader(dataset,
                             batch_size=batch_size,
                             num_workers=num_workers,
                             shuffle=False,
                             pin_memory=True)
+        print(f"loader length: {len(loader)}")
         validation_accuracy = []
+        total = 0
 
         for i, inp in enumerate(loader):
             start_time = time.time()
             video_model.eval()
             video = inp.get("video").cuda(non_blocking=True)
             label = inp.get("label").cuda(non_blocking=True)
+            # The label tensor has a shape of (32,) which means it contains 32 labels for the 32 videos in the batch.
+            # Each label is an integer value that corresponds to the class of the video.
+            print(f"current label: {label}")
             total = total + video.size(0)
             y_v = video_model(video)
-            validation_accuracy.extend((y_v.argmax(-1) == label).cpu().numpy().tolist())
+            y_v_acc = (y_v.argmax(-1) == label).cpu().numpy().tolist()
+            print(f"y_v_acc that we extend to validation accuracy: {y_v_acc}")
+            validation_accuracy.extend(y_v_acc)
             end_time = time.time()
 
             if i % 10 == 0:
