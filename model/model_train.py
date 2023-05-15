@@ -75,6 +75,7 @@ def train(batch_size: int, num_workers: int, learning_rate: float, n_classes: in
                     save_name = join(save_weights_prefix, f"train_iter_{iteration}_epoch_{epoch}_acc_{accuracy}.pt")
                     utils.utils.ensure_dir(save_weights_prefix)
                     torch.save({"video_model": video_model.module.state_dict()}, save_name)
+                    print(f"DEBUG: NEW ACCURACY FOUND: {best_accuracy}")
                     best_accuracy = accuracy
 
             iteration += 1
