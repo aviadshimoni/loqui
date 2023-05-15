@@ -14,13 +14,13 @@ def run_validation_set(video_model: nn.DataParallel, batch_size: int, num_worker
 
     with torch.no_grad():
         dataset = LRWDataset("val", dataset_prefix="/tf/rois/")
-        print(f"dataset object of validation set: {dataset}")
+        print(f"Dataset object of validation set: {dataset}")
         loader = DataLoader(dataset,
                             batch_size=batch_size,
                             num_workers=num_workers,
                             shuffle=False,
                             pin_memory=True)
-        print(f"loader length: {len(loader)}")
+        print(f"Validation Loader length: {len(loader)}")
         validation_accuracy = []
         total = 0
 

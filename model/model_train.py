@@ -27,11 +27,13 @@ def train(batch_size: int, num_workers: int, learning_rate: float, n_classes: in
     """
 
     dataset = LRWDataset("train", dataset_prefix="/tf/rois/")
+    print(f"Dataset object of training set: {dataset}")
     loader = DataLoader(dataset,
                         batch_size=batch_size,
                         num_workers=num_workers,
                         shuffle=False,
                         pin_memory=True)
+    print(f"Train Loader size: {len(loader)}")
     iteration = 0
     best_accuracy = 0
     grad_scaler = GradScaler()
@@ -75,7 +77,7 @@ def train(batch_size: int, num_workers: int, learning_rate: float, n_classes: in
                     save_name = join(save_weights_prefix, f"train_iter_{iteration}_epoch_{epoch}_acc_{accuracy}.pt")
                     utils.utils.ensure_dir(save_weights_prefix)
                     torch.save({"video_model": video_model.module.state_dict()}, save_name)
-                    print(f"DEBUG: NEW ACCURACY FOUND: {best_accuracy}")
+                    print(f"DEBUG: NEW ACCURACY FOUND: {accuracy}, OLD ONE WAS: {best_accuracy}")
                     best_accuracy = accuracy
 
             iteration += 1
