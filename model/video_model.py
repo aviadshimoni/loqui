@@ -1,4 +1,5 @@
 # encoding: utf-8
+import torch
 import torch.nn as nn
 from model.video_cnn import VideoCNN
 from torch.cuda.amp import autocast
@@ -17,7 +18,7 @@ class VideoModel(nn.Module):
         self.dropout = nn.Dropout(p=dropout)
         self.training = training
 
-    def forward(self, v):
+    def forward(self, v: torch.Size) -> torch.Size:
         """
         TODO add documentation
         """
@@ -35,6 +36,5 @@ class VideoModel(nn.Module):
 
         h, _ = self.gru(f_v)
         y_v = self.v_cls(self.dropout(h)).mean(1)
-        print(f"DEBUG: type of given v inside video_model forward func is: {v}")
-        print(f"DEBUG: type of returned y_v inside video_model forward func is: {y_v}")
+
         return y_v
