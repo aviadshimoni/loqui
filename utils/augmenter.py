@@ -1,25 +1,5 @@
-# encoding: utf-8
-import torch
 import random
 import numpy as np
-
-
-#TODO add documentation to all functions in this file
-def tensor_random_flip(tensor):
-    # (b, c, t, h, w)
-    if random.random() > 0.5:
-        return torch.flip(tensor, dims=[4])
-
-    return tensor
-
-
-def tensor_random_crop(tensor, size):
-    h, w = tensor.size(-2), tensor.size(-1)
-    tw, th = size
-    x1 = random.randint(0, w - tw)
-    y1 = random.randint(0, h - th)
-
-    return tensor[:, :, :, x1:x1 + th, y1:y1 + w]
 
 
 def center_crop(batch_img, size):
