@@ -65,7 +65,7 @@ def extract_opencv(file_name: str) -> list:
             break
     cap.release()
 
-    return video
+    return video        
 
 
 target_dir = 'lrw_roi_80_116_175_211_npy_gray_pkl_jpeg'
@@ -82,8 +82,8 @@ class LRWDataset(Dataset):
     def __init__(self):
 
         with open('label_sorted.txt') as myfile:
-            self.labels = myfile.read().splitlines()
-
+            self.labels = myfile.read().splitlines()            
+        
         self.list = []
 
         for i, label in enumerate(self.labels):
@@ -96,7 +96,7 @@ class LRWDataset(Dataset):
 
             files = sorted(files)
             self.list += [(file, i) for file in files]
-
+            
     def __getitem__(self, idx: int) -> dict:
         """
         implements the operator []
@@ -115,7 +115,7 @@ class LRWDataset(Dataset):
 
         output = self.list[idx][0].replace('lrw_mp4', target_dir).replace('.mp4', '.pkl')
         torch.save(result, output)
-
+        
         return result
 
     def __len__(self) -> int:

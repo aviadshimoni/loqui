@@ -16,18 +16,13 @@ class LRWDataset(LRWDatasetInterface):
     and being used when training or testing the model
     """
 
-    def __init__(self, phase, args, dataset_prefix: str = join(dirname(dirname(realpath(__file__))), "dataset"),
+    def __init__(self, phase, dataset_prefix: str = join(dirname(dirname(realpath(__file__))), "dataset"),
                  labels_path: str = "label_sorted.txt") -> None:
         self.phase = phase  # train/val/test
         self.dataset_prefix = dataset_prefix
         self.labels_path = labels_path
         self.labels = self.set_labels()
         self.list = self.append_files()
-        self.args = args  # TODO: find out wtf is this
-
-        # TODO: find out wtf is this
-        if not hasattr(self.args, "is_aug"):
-            setattr(self.args, "is_aug", True)
 
     def set_labels(self) -> list:
         """
