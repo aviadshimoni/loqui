@@ -68,7 +68,7 @@ def extract_opencv(file_name: str) -> list:
     return video        
 
 
-target_dir = 'lrw_roi_80_116_175_211_npy_gray_pkl_jpeg'
+target_dir = 'lrw_roi_npy_gray_pkl_jpeg'
 ensure_dir(target_dir)
 
 
