@@ -27,6 +27,7 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument('--weights', type=str, required=False, default=None)
     parser.add_argument('--save_prefix', type=str, required=True)
     parser.add_argument('--mixup', type=str2bool, required=False, default=False)
+    parser.add_argument('--border', type=str2bool, required=True)
     parser.add_argument('--dataset', type=str, required=False, default='lrw')
 
     args = parser.parse_args()
@@ -44,4 +45,4 @@ if __name__ == '__main__':
         exit()
 
     train(args.lr, args.batch_size, args.n_class, args.max_epoch, args.num_workers, args.gpus, weights=args.weights,
-          save_prefix=args.save_prefix, mixup=args.mixup)
+          save_prefix=args.save_prefix, mixup=args.mixup, is_border=args.border)

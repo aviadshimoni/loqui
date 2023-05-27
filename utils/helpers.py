@@ -38,20 +38,33 @@ def dataset2dataloader(dataset, batch_size, num_workers, shuffle=True):
     return loader
 
 
-def calculate_loss(mixup, alpha, video_model, video, label):
+def get_prediction(video_model, video, border, is_border=False):
+    """
+    gets a model, a video and border. run the model over the given video and return the prediction.
+    uses the border if is_border is true
+    """
+
+    if is_border:
+        return video_model(video, border)
+    return video_model(video)
+
+
+def calculate_loss(mixup, alpha, video_model, video, label, border, is_border=False):
     loss = {}
     loss_fn = nn.CrossEntropyLoss()
+
     with autocast():
         if mixup:
             mixup_coef = np.random.beta(alpha, alpha)
             shuffled_indices = torch.randperm(video.size(0)).cuda(non_blocking=True)
             mixed_video = mixup_coef * video + (1 - mixup_coef) * video[shuffled_indices, :]
+            mix_border = mixup_coef * border + (1 - mixup_coef) * border[shuffled_indices, :]
             mixed_label_a, mixed_label_b = label, label[shuffled_indices]
-            predicted_label = video_model(mixed_video)
+            predicted_label = get_prediction(video_model, mixed_video, mix_border, is_border=is_border)
             loss_bp = mixup_coef * loss_fn(predicted_label, mixed_label_a) + (1 - mixup_coef) * loss_fn(predicted_label,
                                                                                                         mixed_label_b)
         else:
-            predicted_label = video_model(video)
+            predicted_label = get_prediction(video_model, video, border, is_border=is_border)
             loss_bp = loss_fn(predicted_label, label)
     loss['CE V'] = loss_bp
 
@@ -59,10 +72,15 @@ def calculate_loss(mixup, alpha, video_model, video, label):
 
 
 def prepare_data(sample: {}):
+    """
+    extract the relevant data from a given sample
+    """
+
     video = sample['video'].cuda(non_blocking=True)
     label = sample['label'].cuda(non_blocking=True).long()
+    border = sample['duration'].cuda(non_blocking=True).float()
 
-    return video, label
+    return video, label, border
 
 
 def plot_train_metrics(train_losses: [], train_accuracies: [], epoch: int) -> None:
