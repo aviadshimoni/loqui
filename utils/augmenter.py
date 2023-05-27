@@ -11,11 +11,11 @@ def center_crop(batch_img, size):
 
     return img
 
-
 def random_crop(batch_img, size):
     th, tw = size
-    x1 = random.randint(0, 8)
-    y1 = random.randint(0, 8)
+    w, h = batch_img.shape[2], batch_img.shape[1]
+    x1 = random.randint(0, w - tw)
+    y1 = random.randint(0, h - th)
     img = batch_img[:, y1:y1 + th, x1:x1 + tw]
 
     return img

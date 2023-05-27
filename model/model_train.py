@@ -41,7 +41,7 @@ def train(lr: float, batch_size: int, n_class: int, max_epoch: int, num_workers:
         helpers.load_missing(video_model, weight.get('video_model'))
 
     video_model = helpers.parallel_model(video_model)
-    dataset = LRWDataset("train", dataset_prefix="")
+    dataset = LRWDataset("train", dataset_prefix="/tf/Daniel")
     print(f"Dataset object of training set: {dataset}, len is: {len(dataset)}")
 
     loader = helpers.dataset2dataloader(dataset, batch_size, num_workers)

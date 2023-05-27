@@ -42,7 +42,8 @@ class LRWDataset(LRWDatasetInterface):
         lst = []
 
         for i, label in enumerate(self.labels):
-            files = glob.glob(join(self.dataset_prefix, "lrw_roi_npy_gray_pkl_jpeg", label, self.phase, "*.pkl"))
+            files = glob.glob(join(self.dataset_prefix, "custom_lipread_pkls", label, self.phase, "*.pkl"))
+            # files = glob.glob(join(self.dataset_prefix, "../Daniel/custom_lipread_mp4", label, self.phase, "*.pkl"))
             files = sorted(files)
 
             lst += [file for file in files]
@@ -55,7 +56,6 @@ class LRWDataset(LRWDatasetInterface):
         :param idx: index to return of the dataset object
         :return: by given index, return the respectively data on that index
         """
-
         tensor = torch.load(self.list[idx])
         inputs = tensor.get("video")
         inputs = [sg.jpeg.decode(img, pixel_format=TJPF_GRAY) for img in inputs]
@@ -66,6 +66,7 @@ class LRWDataset(LRWDatasetInterface):
         if self.phase == "train":
             batch_img = data_augmenter.random_crop(inputs, (88, 88))
             batch_img = data_augmenter.horizontal_flip(batch_img)
+
         else:  # phase in ["val", "test"]
             batch_img = data_augmenter.center_crop(inputs, (88, 88))
 

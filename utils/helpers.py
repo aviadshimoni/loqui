@@ -35,6 +35,7 @@ def dataset2dataloader(dataset, batch_size, num_workers, shuffle=True):
                         shuffle=shuffle,
                         drop_last=False,
                         pin_memory=True)
+
     return loader
 
 
