@@ -32,10 +32,10 @@ class BasicBlock(nn.Module):
         self.stride = stride
         self.se = se
 
-        # if (self.se):
-        #     self.gap = nn.AdaptiveAvgPool2d(1)
-        #     self.conv3 = conv1x1(planes, planes // 16)
-        #     self.conv4 = conv1x1(planes // 16, planes)
+        if self.se:
+            self.gap = nn.AdaptiveAvgPool2d(1)
+            self.conv3 = conv1x1(planes, planes // 16)
+            self.conv4 = conv1x1(planes // 16, planes)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         residual = x
@@ -48,13 +48,13 @@ class BasicBlock(nn.Module):
         if self.downsample is not None:
             residual = self.downsample(x)
 
-        # if (self.se):
-        #     w = self.gap(out)
-        #     w = self.conv3(w)
-        #     w = self.relu(w)
-        #     w = self.conv4(w).sigmoid()
-        #
-        #     out = out * w
+        if self.se:
+            w = self.gap(out)
+            w = self.conv3(w)
+            w = self.relu(w)
+            w = self.conv4(w).sigmoid()
+
+            out = out * w
 
         out = out + residual
         out = self.relu(out)
@@ -124,12 +124,13 @@ class ResNet(nn.Module):
 class VideoCNN(nn.Module):
     """
     The VideoCNN is used to encode each frame of the input video into a feature vector of length 512.
-     The output of the CNN is a tensor of shape (batch_size, seq_len, 512),
-     where seq_len is the length of the video sequence (i.e. the number of frames in each video).
+    The output of the CNN is a tensor of shape (batch_size, seq_len, 512),
+    where seq_len is the length of the video sequence (i.e. the number of frames in each video).
     """
 
     def __init__(self, se: bool = False) -> None:
         super(VideoCNN, self).__init__()
+        self.se = se
 
         # frontend3D
         self.frontend3D = nn.Sequential(
@@ -139,7 +140,7 @@ class VideoCNN(nn.Module):
             nn.MaxPool3d(kernel_size=(1, 3, 3), stride=(1, 2, 2), padding=(0, 1, 1))
         )
         # resnet
-        self.resnet18 = ResNet(BasicBlock, [2, 2, 2, 2], se=se)
+        self.resnet18 = ResNet(BasicBlock, [2, 2, 2, 2], se=self.se)
         self.dropout = nn.Dropout(p=0.5)
 
         # backend_gru

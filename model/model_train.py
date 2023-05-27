@@ -12,7 +12,7 @@ torch.backends.cudnn.benchmark = True
 
 
 def train(lr: float, batch_size: int, n_class: int, max_epoch: int, num_workers: int = 1, gpus: str = '0',
-          weights=None, save_prefix: str = '', mixup: bool = False, is_border: bool = False) -> None:
+          weights=None, save_prefix: str = '', mixup: bool = False, is_border: bool = False, se: bool = False) -> None:
     """
     Handle the model training
     :param lr: TODO
@@ -25,12 +25,13 @@ def train(lr: float, batch_size: int, n_class: int, max_epoch: int, num_workers:
     :param save_prefix: TODO
     :param mixup: TODO
     :param is_border: TODO
+    :param se: TODO
     :return: None
     """
 
     os.environ['CUDA_VISIBLE_DEVICES'] = gpus
 
-    video_model = VideoModel(n_class, is_border=is_border).cuda()
+    video_model = VideoModel(n_class, is_border=is_border, se=se).cuda()
 
     lr = batch_size / 32.0 / torch.cuda.device_count() * lr
     optim_video = optim.Adam(video_model.parameters(), lr=lr, weight_decay=1e-4)

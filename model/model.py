@@ -28,11 +28,13 @@ class VideoModel(nn.Module, metaclass=Singleton):
     and outputs a tensor of shape (batch_size, n_class) containing the logits for each video in the batch.
     """
 
-    def __init__(self, num_classes: int, dropout: float = 0.5, training: bool = False, is_border: bool = False) -> None:
+    def __init__(self, num_classes: int, dropout: float = 0.5, training: bool = False, is_border: bool = False,
+                 se: bool = False) -> None:
         super(VideoModel, self).__init__()
+        self.se = se
         self.is_border = is_border
         self.num_classes = num_classes
-        self.video_cnn = VideoCNN()
+        self.video_cnn = VideoCNN(se=self.se)
         in_dim = 512 + 1 if self.is_border else 512
         self.gru = nn.GRU(in_dim, 1024, 3, batch_first=True, bidirectional=True, dropout=0.2)
         self.v_cls = nn.Linear(1024 * 2, self.num_classes)
