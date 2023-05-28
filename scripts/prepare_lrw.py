@@ -91,7 +91,7 @@ def extract_opencv(file_name: str) -> list:
 
 
 # target_dir = 'lrw_roi_80_116_175_211_npy_gray_pkl_jpeg'
-target_dir = '/tf/Daniel/custom_lipread_pkls'
+target_dir = '/tf/loqui/custom_lipread_pkls'
 ensure_dir(target_dir)
 
 
