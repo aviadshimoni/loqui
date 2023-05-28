@@ -16,13 +16,15 @@ class LRWDataset(LRWDatasetInterface):
     and being used when training or testing the model
     """
 
-    def __init__(self, phase, dataset_prefix: str = join(dirname(dirname(realpath(__file__)))),
+    def __init__(self, phase, dataset_prefix: str,
                  labels_path: str = "label_sorted.txt") -> None:
         self.phase = phase  # train/val/test
         self.dataset_prefix = dataset_prefix
         self.labels_path = labels_path
         self.labels = self.set_labels()
+        print(self.labels)
         self.list = self.append_files()
+        print(self.list)
 
     def set_labels(self) -> list:
         """
