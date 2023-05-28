@@ -172,5 +172,5 @@ def main():
         print(f'eta:{eta:.5f}')
 
 
-if _name_ == '_main_':
+if __name__ == '_main_':
     main()
