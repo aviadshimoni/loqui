@@ -102,7 +102,7 @@ class LRWDataset(Dataset):
     and generates training samples of LRW
     """
 
-    def _init_(self, mp4_path='lrw_mp4'):
+    def __init__(self, mp4_path='lrw_mp4'):
         self.mp4_path = mp4_path
 
         with open('/tf/loqui/label_sorted.txt') as myfile:
@@ -111,7 +111,7 @@ class LRWDataset(Dataset):
         self.list = []
 
         for i, label in enumerate(self.labels):
-            files = glob.glob(os.path.join(self.mp4_path, label, '', '.mp4'))
+            files = glob.glob(os.path.join(self.mp4_path, label, '*', '*.mp4'))
 
             for file in files:
                 file_to_save = file.replace(self.mp4_path, target_dir).replace('.mp4', '.pkl')
@@ -121,7 +121,7 @@ class LRWDataset(Dataset):
             files = sorted(files)
             self.list += [(file, i) for file in files]
 
-    def _getitem_(self, idx: int) -> dict:
+    def __getitem__(self, idx: int) -> dict:
         """
         implements the operator []
         :param idx: index to return of the dataset object
@@ -148,7 +148,7 @@ class LRWDataset(Dataset):
 
         return result
 
-    def _len_(self) -> int:
+    def __len__(self) -> int:
         """
         implements the len operator
         :return: len of self.list
