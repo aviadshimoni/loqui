@@ -73,7 +73,6 @@ def extract_opencv(file_name: str) -> list:
         if ret:
             frame = cv2.resize(frame, (256, 256))
             frame = frame[115:211, 79:175]
-            print(frame.shape)
             _, jpeg_frame = cv2.imencode('.jpg', frame)
             frame_bytes = jpeg_frame.tobytes()
             video.append(frame_bytes)
