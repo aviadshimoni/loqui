@@ -59,9 +59,6 @@ def train(lr: float, batch_size: int, n_class: int, max_epoch: int, num_workers:
         train_loss = 0.0
 
         for i_iteration, sample in enumerate(loader):
-            start_time = time.time()
-            print("sdfvdf6666668888866666666")
-
             video_model.train()
             video, label, border = helpers.prepare_data(sample)
 
@@ -72,14 +69,6 @@ def train(lr: float, batch_size: int, n_class: int, max_epoch: int, num_workers:
             scaler.update()
 
             train_loss += loss['CE V'].item()
-            end_time = time.time()
-
-            msg = f'epoch={epoch},train_iter={tot_iter},eta={(end_time - start_time) * (len(loader) - i_iteration) / 3600.0:.5f}'
-
-            for k, v in loss.items():
-                msg += f',{k}={v:.5f}'
-            msg += f",lr={helpers.show_lr(optim_video)},best_acc={best_acc:2f}"
-            print(msg)
 
             if i_iteration == len(loader) - 1 or (epoch == 0 and i_iteration == 0):
                 acc, msg = validation(video_model, batch_size, is_border=is_border)
@@ -102,7 +91,10 @@ def train(lr: float, batch_size: int, n_class: int, max_epoch: int, num_workers:
         loss = train_loss / len(loader)
         train_losses.append(loss)
 
-        print('plot train metrics:')
-        helpers.plot_train_metrics(train_losses, train_accs, epoch)
+        print(f'End of Epoch {epoch + 1}:')
+        print(f'Train Loss: {loss:.5f}')
+        print(f'Train Accuracy: {train_accs[-1]:.5f}')
 
         scheduler.step()
+
+    print('Training completed!')
