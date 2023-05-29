@@ -7,12 +7,13 @@ from model.lrw_dataset import LRWDataset
 
 
 @torch.no_grad()
-def validation(video_model, batch_size: int, num_workers: int = 1):
+def validation(video_model, batch_size: int, num_workers: int = 1, is_border: bool = False):
     """
     Evaluate the model by validation set
     :param video_model: TODO
     :param batch_size: TODO
     :param num_workers: TODO
+    :param is_border: TODO
     :return:
     """
 
@@ -27,12 +28,12 @@ def validation(video_model, batch_size: int, num_workers: int = 1):
         video_model.eval()
 
         start_time = time.time()
-        video, label = helpers.prepare_data(sample)
+        video, label, border = helpers.prepare_data(sample)
 
         with autocast():
-            y_v = video_model(video)
+            predicted_label = helpers.get_prediction(video_model, video, border, is_border=is_border)
 
-        validation_accuracy.extend((y_v.argmax(-1) == label).cpu().numpy().tolist())
+        validation_accuracy.extend((predicted_label.argmax(-1) == label).cpu().numpy().tolist())
         end_time = time.time()
 
         if i_iter % 10 == 0:

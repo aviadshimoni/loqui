@@ -12,7 +12,7 @@ torch.backends.cudnn.benchmark = True
 
 
 def train(lr: float, batch_size: int, n_class: int, max_epoch: int, num_workers: int = 1, gpus: str = '0',
-          weights=None, save_prefix: str = '', mixup: bool = False) -> None:
+          weights=None, save_prefix: str = '', mixup: bool = False, is_border: bool = False, se: bool = False) -> None:
     """
     Handle the model training
     :param lr: TODO
@@ -24,12 +24,14 @@ def train(lr: float, batch_size: int, n_class: int, max_epoch: int, num_workers:
     :param weights: TODO
     :param save_prefix: TODO
     :param mixup: TODO
+    :param is_border: TODO
+    :param se: TODO
     :return: None
     """
 
     os.environ['CUDA_VISIBLE_DEVICES'] = gpus
 
-    video_model = VideoModel(n_class).cuda()
+    video_model = VideoModel(n_class, is_border=is_border, se=se).cuda()
 
     lr = batch_size / 32.0 / torch.cuda.device_count() * lr
     optim_video = optim.Adam(video_model.parameters(), lr=lr, weight_decay=1e-4)
@@ -60,9 +62,9 @@ def train(lr: float, batch_size: int, n_class: int, max_epoch: int, num_workers:
             start_time = time.time()
 
             video_model.train()
-            video, label = helpers.prepare_data(sample)
+            video, label, border = helpers.prepare_data(sample)
 
-            loss = helpers.calculate_loss(mixup, alpha, video_model, video, label)
+            loss = helpers.calculate_loss(mixup, alpha, video_model, video, label, border, is_border=is_border)
             optim_video.zero_grad()
             scaler.scale(loss['CE V']).backward()
             scaler.step(optim_video)
@@ -79,7 +81,7 @@ def train(lr: float, batch_size: int, n_class: int, max_epoch: int, num_workers:
             print(msg)
 
             if i_iteration == len(loader) - 1 or (epoch == 0 and i_iteration == 0):
-                acc, msg = validation(video_model, batch_size)
+                acc, msg = validation(video_model, batch_size, is_border=is_border)
                 train_accs.append(acc)
 
                 if acc > best_acc:
