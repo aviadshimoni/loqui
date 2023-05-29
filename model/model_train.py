@@ -60,7 +60,7 @@ def train(lr: float, batch_size: int, n_class: int, max_epoch: int, num_workers:
 
         for i_iteration, sample in enumerate(loader):
             start_time = time.time()
-            print("sdfvdf66666666666666")
+            print("sdfvdf6666668888866666666")
 
             video_model.train()
             video, label, border = helpers.prepare_data(sample)
