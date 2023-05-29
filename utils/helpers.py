@@ -52,9 +52,7 @@ def calculate_loss(mixup, alpha, video_model, video, label):
                                                                                                         mixed_label_b)
         else:
             predicted_label = video_model(video)
-            print(predicted_label)
             loss_bp = loss_fn(predicted_label, label)
-            print(loss_bp)
     loss['CE V'] = loss_bp
 
     return loss
