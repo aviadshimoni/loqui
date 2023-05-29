@@ -17,7 +17,7 @@ def validation(video_model, batch_size: int, num_workers: int = 1, is_border: bo
     :return:
     """
 
-    dataset = LRWDataset("val", dataset_prefix="")
+    dataset = LRWDataset("val", dataset_prefix="/tf/loqui")
     print(f"Dataset object of Validation set: {dataset}, len is: {len(dataset)}")
     loader = helpers.dataset2dataloader(dataset, batch_size, num_workers, shuffle=False)
 
