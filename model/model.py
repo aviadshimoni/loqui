@@ -40,7 +40,7 @@ class VideoModel(nn.Module, metaclass=Singleton):
         self.v_cls = nn.Linear(1024 * 2, self.num_classes)
         self.dropout = nn.Dropout(p=dropout)
 
-    def forward(self, v: torch.Size, border=None) -> torch.Size:
+    def forward(self, v: torch.Size, border: torch.tensor = None) -> torch.Size:
         """
         The output of the CNN is fed into a bidirectional GRU network with 1024 hidden units per direction, and 3 layers.
         The GRU network outputs a tensor of shape (batch_size, seq_len, 2048).
@@ -60,7 +60,6 @@ class VideoModel(nn.Module, metaclass=Singleton):
             f_v = self.dropout(f_v)
 
         if self.is_border:
-            print(f"im in border. given border is: {border} type is: {type(border)}")
             border = border[:, :, None]
             h, _ = self.gru(torch.cat([f_v, border], -1))
         else:
