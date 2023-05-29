@@ -24,7 +24,6 @@ class LRWDataset(LRWDatasetInterface):
         self.labels = self.set_labels()
         print(self.labels)
         self.list = self.append_files()
-        print(self.list)
 
     def set_labels(self) -> list:
         """
