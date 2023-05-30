@@ -45,7 +45,6 @@ def train(lr: float, batch_size: int, n_class: int, max_epoch: int, num_workers:
     video_model = helpers.parallel_model(video_model)
     dataset = LRWDataset("train", dataset_prefix="/tf/loqui")
     print(f"Dataset object of training set: {dataset}, len is: {len(dataset)}")
-
     loader = helpers.dataset2dataloader(dataset, batch_size, num_workers)
 
     alpha = 0.2
