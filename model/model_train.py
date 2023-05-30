@@ -7,10 +7,9 @@ from utils import helpers
 from model import VideoModel
 from torch.cuda.amp import GradScaler
 from model.lrw_dataset import LRWDataset
-import logging
+from utils.helpers import get_logger
 
-logging.basicConfig(level=logging.INFO, format='%(message)s')
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 torch.backends.cudnn.benchmark = True
 

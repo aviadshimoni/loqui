@@ -4,11 +4,9 @@ import time
 from torch.cuda.amp import autocast
 from utils import helpers
 from model.lrw_dataset import LRWDataset
-import logging
+from utils.helpers import get_logger
 
-logging.basicConfig(level=logging.INFO, format='%(message)s')
-logger = logging.getLogger(__name__)
-
+logger = get_logger(__name__)
 
 @torch.no_grad()
 def validation(video_model, batch_size: int, num_workers: int = 1, is_border: bool = False):
