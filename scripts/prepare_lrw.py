@@ -158,7 +158,7 @@ class LRWDataset(Dataset):
 
 def main():
     loader = DataLoader(LRWDataset("/tf/Daniel/custom_lipread_mp4"),
-                        batch_size=32,
+                        batch_size=1,
                         num_workers=16,
                         shuffle=False,
                         drop_last=False)
