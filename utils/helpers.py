@@ -30,8 +30,6 @@ def show_lr(optimizer):
     return ','.join(['{:.6f}'.format(param_group['lr']) for param_group in optimizer.param_groups])
 
 
-import numpy as np
-
 def collate_fn(batch):
     videos = [sample['video'] for sample in batch]
     labels = [sample['label'] for sample in batch]
@@ -53,15 +51,23 @@ def collate_fn(batch):
 
     # Convert other lists to tensors
     labels_tensor = torch.tensor(labels)
-    durations_array = np.zeros((len(durations),))  # Create an empty numpy array
 
-    # Fill the numpy array with durations
-    for i, duration in enumerate(durations):
-        durations_array[i] = duration
+    # Determine the maximum duration in the batch
+    max_duration = max([len(duration) for duration in durations])
 
-    durations_tensor = torch.tensor(durations_array)
+    # Pad durations to have the same length
+    padded_durations = []
+    for duration in durations:
+        padding_duration = [duration[-1]] * (max_duration - len(duration))
+        padding_duration = torch.tensor(padding_duration)
+        padded_duration = torch.cat((duration, padding_duration), dim=0)
+        padded_durations.append(padded_duration)
+
+    # Convert the padded durations to a tensor
+    durations_tensor = torch.stack(padded_durations)
 
     return {'video': videos_tensor, 'label': labels_tensor, 'duration': durations_tensor}
+
 
 
 
