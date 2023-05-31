@@ -29,7 +29,7 @@ def load_missing(model, pretrained_dict):
 def show_lr(optimizer):
     return ','.join(['{:.6f}'.format(param_group['lr']) for param_group in optimizer.param_groups])
 
-
+#comment
 def collate_fn(batch):
     videos = [sample['video'] for sample in batch]
     labels = [sample['label'] for sample in batch]
