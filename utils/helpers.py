@@ -42,17 +42,19 @@ def collate_fn(batch):
     padded_videos = []
     for video in videos:
         padding_frames = [video[-1]] * (max_frame_count - len(video))
-        padded_video = video + padding_frames
+        padding_frames = torch.tensor(padding_frames)  # Convert to a PyTorch tensor
+        padded_video = torch.cat((video, padding_frames), dim=0)  # Concatenate tensors
         padded_videos.append(padded_video)
 
     # Convert the padded videos to a tensor
-    videos_tensor = torch.tensor(padded_videos)
+    videos_tensor = torch.stack(padded_videos)
 
     # Convert other lists to tensors
     labels_tensor = torch.tensor(labels)
     durations_tensor = torch.tensor(durations)
 
     return {'video': videos_tensor, 'label': labels_tensor, 'duration': durations_tensor}
+
 
 
 def dataset2dataloader(dataset, batch_size, num_workers, shuffle=True):
