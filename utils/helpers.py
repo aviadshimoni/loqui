@@ -34,13 +34,13 @@ def show_lr(optimizer):
 import numpy as np
 import torch
 
-def collate_fn(data):
-    videos, labels, durations = zip(*data)
-    videos = [torch.from_numpy(video) if isinstance(video, np.ndarray) else video for video in videos]
-    videos = torch.stack(videos)
-    labels = torch.stack(labels)
-    durations = torch.stack(durations)
-    return videos, labels, durations
+def collate_fn(batch):
+    videos, labels, borders = zip(*batch)
+    videos = np.array(videos)  # Convert to a single numpy array
+    videos = torch.tensor(videos)  # Convert to a tensor
+    labels = torch.tensor(labels)
+    borders = torch.tensor(borders)
+    return videos, labels, borders
 
 def dataset2dataloader(dataset, batch_size, num_workers, shuffle=True):
     loader = DataLoader(dataset,
