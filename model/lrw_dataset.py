@@ -51,28 +51,27 @@ class LRWDataset(LRWDatasetInterface):
 
     def __getitem__(self, idx: int) -> dict:
         """
-        implements the operator []
-        :param idx: index to return of the dataset object
-        :return: by given index, return the respectively data on that index
+        Implements the operator [].
+        :param idx: Index to return from the dataset object.
+        :return: Data corresponding to the given index.
         """
-
         tensor = torch.load(self.list[idx])
         inputs = tensor.get("video")
         inputs = [sg.jpeg.decode(img, pixel_format=TJPF_GRAY) for img in inputs]
         inputs = np.stack(inputs, 0) / 255.0
         inputs = inputs[:, :, :, 0]
 
-        # TODO check what type inputs is and update the augmentation functions documentations
         if self.phase == "train":
             batch_img = data_augmenter.random_crop(inputs, (88, 88))
             batch_img = data_augmenter.horizontal_flip(batch_img)
         else:  # phase in ["val", "test"]
             batch_img = data_augmenter.center_crop(inputs, (88, 88))
 
-        result = {"video": torch.FloatTensor(batch_img[:, np.newaxis, ...]),
-                  "label": tensor.get("label"),
-                  "duration": 1.0 * tensor.get("duration")}
-        # print(result["video"].size())
+        result = {
+            "video": torch.FloatTensor(batch_img[:, np.newaxis, ...]),
+            "label": torch.tensor([tensor.get("label")]),  # Ensure label is a tensor
+            "duration": torch.tensor([1.0 * tensor.get("duration")])  # Ensure duration is a tensor
+        }
 
         return result
 
