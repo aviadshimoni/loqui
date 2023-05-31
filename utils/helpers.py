@@ -35,22 +35,25 @@ def collate_fn(batch):
     labels = [sample['label'] for sample in batch]
     durations = [sample['duration'] for sample in batch]
 
-    # Resize video frames to the same dimensions
+    # Determine the maximum length of the videos in the batch
     max_frame_count = max([len(video) for video in videos])
-    resized_videos = []
-    for video in videos:
-        padding_frames = video[-1:] * (max_frame_count - len(video))
-        resized_video = video + padding_frames
-        resized_videos.append(resized_video)
 
-    # Convert the resized videos to a tensor
-    videos_tensor = torch.tensor(resized_videos)
+    # Pad videos to have the same length
+    padded_videos = []
+    for video in videos:
+        padding_frames = [video[-1]] * (max_frame_count - len(video))
+        padded_video = video + padding_frames
+        padded_videos.append(padded_video)
+
+    # Convert the padded videos to a tensor
+    videos_tensor = torch.tensor(padded_videos)
 
     # Convert other lists to tensors
     labels_tensor = torch.tensor(labels)
     durations_tensor = torch.tensor(durations)
 
     return {'video': videos_tensor, 'label': labels_tensor, 'duration': durations_tensor}
+
 
 def dataset2dataloader(dataset, batch_size, num_workers, shuffle=True):
     loader = DataLoader(dataset,
