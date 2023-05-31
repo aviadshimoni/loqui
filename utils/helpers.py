@@ -30,14 +30,38 @@ def show_lr(optimizer):
     return ','.join(['{:.6f}'.format(param_group['lr']) for param_group in optimizer.param_groups])
 
 
+def collate_fn(batch):
+    videos = [sample['video'] for sample in batch]
+    labels = [sample['label'] for sample in batch]
+    durations = [sample['duration'] for sample in batch]
+
+    # Resize video frames to the same dimensions
+    max_frame_count = max([len(video) for video in videos])
+    resized_videos = []
+    for video in videos:
+        padding_frames = video[-1:] * (max_frame_count - len(video))
+        resized_video = video + padding_frames
+        resized_videos.append(resized_video)
+
+    # Convert the resized videos to a tensor
+    videos_tensor = torch.tensor(resized_videos)
+
+    # Convert other lists to tensors
+    labels_tensor = torch.tensor(labels)
+    durations_tensor = torch.tensor(durations)
+
+    return {'video': videos_tensor, 'label': labels_tensor, 'duration': durations_tensor}
+
 def dataset2dataloader(dataset, batch_size, num_workers, shuffle=True):
     loader = DataLoader(dataset,
                         batch_size=batch_size,
                         num_workers=num_workers,
                         shuffle=shuffle,
                         drop_last=False,
+                        collate_fn=collate_fn,
                         pin_memory=True)
     return loader
+
 
 
 
