@@ -7,6 +7,7 @@ from torch.cuda.amp import autocast
 import torch
 import matplotlib.pyplot as plt
 
+from torch.nn.utils.rnn import pad_sequence
 
 def parallel_model(model):
     return nn.DataParallel(model)
@@ -30,57 +31,19 @@ def show_lr(optimizer):
     return ','.join(['{:.6f}'.format(param_group['lr']) for param_group in optimizer.param_groups])
 
 
-def collate_fn(batch):
-    videos = [sample['video'] for sample in batch]
-    labels = [sample['label'] for sample in batch]
-    durations = [torch.tensor(sample['duration']) for sample in batch]
+def collate_fn(data):
+    videos, durations, labels = zip(*data)
+    videos = torch.stack(videos)
+    labels = torch.tensor(labels)
 
-    # Determine the maximum length of the videos in the batch
-    max_frame_count = max([video.size(0) for video in videos])
-
-    # Pad videos to have the same length
-    padded_videos = []
-    for video in videos:
-        if video.size(0) < max_frame_count:
-            padding_frames = [video[-1]] * (max_frame_count - video.size(0))
-            padding_frames = torch.stack(padding_frames)
-            padded_video = torch.cat((video, padding_frames), dim=0)
-        else:
-            padded_video = video
-        padded_videos.append(padded_video)
-
-    # Convert the padded videos to a tensor
-    videos_tensor = torch.stack(padded_videos)
-
-    # Convert other lists to tensors
-    labels_tensor = torch.tensor(labels)
-
-    # Determine the maximum duration in the batch
-    if durations:
-        max_duration = max([duration.size(0) for duration in durations if len(duration.size()) > 0])
+    # Check if durations tensor is empty
+    if not durations:
+        durations = torch.zeros(1)
     else:
-        max_duration = 0
+        max_duration = max([duration.size(0) for duration in durations])
+        durations = torch.stack([pad_sequence(duration, max_duration) for duration in durations])
 
-    # Pad durations to have the same length
-    padded_durations = []
-    for duration in durations:
-        if duration.size(0) < max_duration:
-            padding_duration = [duration[-1]] * (max_duration - duration.size(0))
-            padding_duration = torch.tensor(padding_duration)
-            padded_duration = torch.cat((duration, padding_duration), dim=0)
-        else:
-            padded_duration = duration
-        padded_durations.append(padded_duration)
-
-    # Convert the padded durations to a tensor
-    durations_tensor = torch.stack(padded_durations)
-
-    return {'video': videos_tensor, 'label': labels_tensor, 'duration': durations_tensor}
-
-
-
-
-
+    return videos, durations, labels
 
 
 def dataset2dataloader(dataset, batch_size, num_workers, shuffle=True):
@@ -92,8 +55,6 @@ def dataset2dataloader(dataset, batch_size, num_workers, shuffle=True):
                         collate_fn=collate_fn,
                         pin_memory=True)
     return loader
-
-
 
 
 def get_prediction(video_model, video, border, is_border=False):
