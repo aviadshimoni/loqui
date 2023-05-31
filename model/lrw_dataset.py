@@ -58,7 +58,7 @@ class LRWDataset(LRWDatasetInterface):
         tensor = torch.load(self.list[idx])
         inputs = tensor.get("video")
         inputs = [sg.jpeg.decode(img, pixel_format=TJPF_GRAY) for img in inputs]
-        inputs = np.stack(inputs, 0) / 255.0
+        inputs = np.stack([np.array(img) for img in inputs], 0) / 255.0
         inputs = inputs[:, :, :, 0]
 
         if self.phase == "train":
