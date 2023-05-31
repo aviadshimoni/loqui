@@ -30,6 +30,8 @@ def show_lr(optimizer):
     return ','.join(['{:.6f}'.format(param_group['lr']) for param_group in optimizer.param_groups])
 
 
+import numpy as np
+
 def collate_fn(batch):
     videos = [sample['video'] for sample in batch]
     labels = [sample['label'] for sample in batch]
@@ -51,7 +53,12 @@ def collate_fn(batch):
 
     # Convert other lists to tensors
     labels_tensor = torch.tensor(labels)
-    durations_array = np.array(durations)  # Convert to numpy array
+    durations_array = np.zeros((len(durations),))  # Create an empty numpy array
+
+    # Fill the numpy array with durations
+    for i, duration in enumerate(durations):
+        durations_array[i] = duration
+
     durations_tensor = torch.tensor(durations_array)
 
     return {'video': videos_tensor, 'label': labels_tensor, 'duration': durations_tensor}
