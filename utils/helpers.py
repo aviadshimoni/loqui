@@ -32,6 +32,8 @@ def show_lr(optimizer):
 
 import torch
 
+import torch
+
 def collate_fn(batch):
     videos = [sample['video'] for sample in batch]
     labels = [sample['label'] for sample in batch]
@@ -58,7 +60,10 @@ def collate_fn(batch):
     labels_tensor = torch.tensor(labels)
 
     # Determine the maximum duration in the batch
-    max_duration = max([duration.size(0) for duration in durations])
+    if durations:
+        max_duration = max([duration.size(0) for duration in durations])
+    else:
+        max_duration = 0
 
     # Pad durations to have the same length
     padded_durations = []
@@ -75,6 +80,7 @@ def collate_fn(batch):
     durations_tensor = torch.stack(padded_durations)
 
     return {'video': videos_tensor, 'label': labels_tensor, 'duration': durations_tensor}
+
 
 
 
