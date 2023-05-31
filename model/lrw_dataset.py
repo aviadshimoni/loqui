@@ -68,7 +68,7 @@ class LRWDataset(LRWDatasetInterface):
             batch_img = data_augmenter.center_crop(inputs, (88, 88))
 
         result = {
-            "video": torch.FloatTensor(batch_img[:, np.newaxis, ...]),
+            "video": torch.FloatTensor(np.array(batch_img[:, np.newaxis, ...])),  # Convert to numpy array first
             "label": torch.tensor([tensor.get("label")]),  # Ensure label is a tensor
             "duration": torch.tensor([1.0 * tensor.get("duration")])  # Ensure duration is a tensor
         }
