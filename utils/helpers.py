@@ -29,7 +29,7 @@ def load_missing(model, pretrained_dict):
 def show_lr(optimizer):
     return ','.join(['{:.6f}'.format(param_group['lr']) for param_group in optimizer.param_groups])
 
-#comment
+
 def collate_fn(batch):
     videos = [sample['video'] for sample in batch]
     labels = [sample['label'] for sample in batch]
@@ -42,8 +42,8 @@ def collate_fn(batch):
     padded_videos = []
     for video in videos:
         padding_frames = [video[-1]] * (max_frame_count - len(video))
-        padding_frames = torch.tensor(padding_frames)  # Convert to a PyTorch tensor
-        padded_video = torch.cat((video, padding_frames), dim=0)  # Concatenate tensors
+        padding_frames = torch.tensor(padding_frames)
+        padded_video = torch.cat((video, padding_frames), dim=0)
         padded_videos.append(padded_video)
 
     # Convert the padded videos to a tensor
@@ -51,7 +51,8 @@ def collate_fn(batch):
 
     # Convert other lists to tensors
     labels_tensor = torch.tensor(labels)
-    durations_tensor = torch.tensor(durations)
+    durations_array = np.array(durations)  # Convert to numpy array
+    durations_tensor = torch.tensor(durations_array)
 
     return {'video': videos_tensor, 'label': labels_tensor, 'duration': durations_tensor}
 
