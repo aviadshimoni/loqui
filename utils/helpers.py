@@ -1,3 +1,5 @@
+import logging
+
 import torch.nn as nn
 from torch.utils.data import DataLoader
 import numpy as np
@@ -119,3 +121,9 @@ def add_msg(msg, k, v):
     msg += k.format(v)
 
     return msg
+
+
+def get_logger(name):
+    logging.basicConfig(level=logging.INFO, format='%(message)s')
+    logger = logging.getLogger(name)
+    return logger
