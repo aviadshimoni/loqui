@@ -7,6 +7,9 @@ from utils import helpers
 from model import VideoModel
 from torch.cuda.amp import GradScaler
 from model.lrw_dataset import LRWDataset
+from utils.helpers import get_logger
+
+logger = get_logger(__name__)
 
 torch.backends.cudnn.benchmark = True
 
@@ -38,13 +41,13 @@ def train(lr: float, batch_size: int, n_class: int, max_epoch: int, num_workers:
     scheduler = optim.lr_scheduler.CosineAnnealingLR(optim_video, T_max=max_epoch, eta_min=5e-6)
 
     if weights is not None:
-        print('load weights')
+        logger.info('load weights')
         weight = torch.load(weights, map_location=torch.device('cpu'))
         helpers.load_missing(video_model, weight.get('video_model'))
 
     video_model = helpers.parallel_model(video_model)
     dataset = LRWDataset("train", dataset_prefix="/tf/loqui")
-    print(f"Dataset object of training set: {dataset}, len is: {len(dataset)}")
+    logger.info(f"Dataset object of training set: {dataset}, len is: {len(dataset)}")
 
     loader = helpers.dataset2dataloader(dataset, batch_size, num_workers)
 
@@ -60,7 +63,6 @@ def train(lr: float, batch_size: int, n_class: int, max_epoch: int, num_workers:
 
         for i_iteration, sample in enumerate(loader):
             start_time = time.time()
-
             video_model.train()
             video, label, border = helpers.prepare_data(sample)
 
@@ -78,7 +80,7 @@ def train(lr: float, batch_size: int, n_class: int, max_epoch: int, num_workers:
             for k, v in loss.items():
                 msg += f',{k}={v:.5f}'
             msg += f",lr={helpers.show_lr(optim_video)},best_acc={best_acc:2f}"
-            print(msg)
+            logger.info(msg)
 
             if i_iteration == len(loader) - 1 or (epoch == 0 and i_iteration == 0):
                 acc, msg = validation(video_model, batch_size, is_border=is_border)
@@ -101,7 +103,7 @@ def train(lr: float, batch_size: int, n_class: int, max_epoch: int, num_workers:
         loss = train_loss / len(loader)
         train_losses.append(loss)
 
-        print('plot train metrics:')
+        logger.info('plot train metrics:')
         helpers.plot_train_metrics(train_losses, train_accs, epoch)
 
         scheduler.step()
