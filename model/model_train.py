@@ -11,7 +11,7 @@ from utils.helpers import get_logger
 
 logger = get_logger(__name__)
 
-# torch.backends.cudnn.benchmark = True
+torch.backends.cudnn.benchmark = True
 
 
 def train(lr: float, batch_size: int, n_class: int, max_epoch: int, num_workers: int = 1, gpus: str = '0',
@@ -33,6 +33,7 @@ def train(lr: float, batch_size: int, n_class: int, max_epoch: int, num_workers:
     """
 
     os.environ['CUDA_VISIBLE_DEVICES'] = gpus
+    os.environ['CUDA_LAUNCH_BLOCKING'] = 1
 
     video_model = VideoModel(n_class, is_border=is_border, se=se).cuda()
 
