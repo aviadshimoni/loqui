@@ -31,9 +31,14 @@ def show_lr(optimizer):
     return ','.join(['{:.6f}'.format(param_group['lr']) for param_group in optimizer.param_groups])
 
 
+import numpy as np
+import torch
+from torch.nn.utils.rnn import pad_sequence
+
 def collate_fn(data):
     videos, durations, labels = zip(*data)
-    videos = torch.stack(videos)
+    videos = [video[:29] for video in videos]  # Truncate sequences to maximum length 29 frames
+    videos = torch.stack([torch.from_numpy(video) for video in videos])
     labels = torch.tensor(labels)
 
     # Check if durations tensor is empty
