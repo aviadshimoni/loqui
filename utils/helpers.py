@@ -33,22 +33,14 @@ def show_lr(optimizer):
 
 import numpy as np
 import torch
-from torch.nn.utils.rnn import pad_sequence
 
 def collate_fn(data):
-    videos, durations, labels = zip(*data)
-    videos = [video[:29] for video in videos]  # Truncate sequences to maximum length 29 frames
-    videos = torch.stack([torch.from_numpy(video) for video in videos])
-    labels = torch.tensor(labels)
-
-    # Check if durations tensor is empty
-    if not durations:
-        durations = torch.zeros(1)
-    else:
-        max_duration = max([duration.size(0) for duration in durations])
-        durations = torch.stack([pad_sequence(duration, max_duration) for duration in durations])
-
-    return videos, durations, labels
+    videos, labels, durations = zip(*data)
+    videos = [torch.from_numpy(video) if isinstance(video, np.ndarray) else video for video in videos]
+    videos = torch.stack(videos)
+    labels = torch.stack(labels)
+    durations = torch.stack(durations)
+    return videos, labels, durations
 
 def dataset2dataloader(dataset, batch_size, num_workers, shuffle=True):
     loader = DataLoader(dataset,
