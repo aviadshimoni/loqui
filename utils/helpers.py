@@ -36,13 +36,13 @@ def collate_fn(batch):
     durations = [sample['duration'] for sample in batch]
 
     # Determine the maximum length of the videos in the batch
-    max_frame_count = max([len(video) for video in videos])
+    max_frame_count = max([video.size(0) for video in videos])
 
     # Pad videos to have the same length
     padded_videos = []
     for video in videos:
-        padding_frames = [video[-1]] * (max_frame_count - len(video))
-        padding_frames = torch.tensor(padding_frames)
+        padding_frames = [video[-1]] * (max_frame_count - video.size(0))
+        padding_frames = torch.stack(padding_frames)
         padded_video = torch.cat((video, padding_frames), dim=0)
         padded_videos.append(padded_video)
 
@@ -53,14 +53,14 @@ def collate_fn(batch):
     labels_tensor = torch.tensor(labels)
 
     # Determine the maximum duration in the batch
-    max_duration = max([len(duration) for duration in durations])
+    max_duration = max([duration.size(0) for duration in durations])
 
     # Pad durations to have the same length
     padded_durations = []
     for duration in durations:
-        padding_duration = [duration[-1]] * (max_duration - len(duration))
-        padding_duration = torch.tensor(padding_duration)
-        duration = torch.tensor(duration)  # Convert duration to tensor
+        padding_duration = [duration[-1]] * (max_duration - duration.size(0))
+        padding_duration = torch.stack(padding_duration)
+        duration = torch.stack(duration)  # Convert duration to tensor
         padded_duration = torch.cat((duration, padding_duration), dim=0)
         padded_durations.append(padded_duration)
 
@@ -68,6 +68,7 @@ def collate_fn(batch):
     durations_tensor = torch.stack(padded_durations)
 
     return {'video': videos_tensor, 'label': labels_tensor, 'duration': durations_tensor}
+
 
 
 
