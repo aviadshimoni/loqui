@@ -45,7 +45,6 @@ def collate_fn(data):
 
     return videos, durations, labels
 
-
 def dataset2dataloader(dataset, batch_size, num_workers, shuffle=True):
     loader = DataLoader(dataset,
                         batch_size=batch_size,
