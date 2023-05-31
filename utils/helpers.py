@@ -30,6 +30,8 @@ def show_lr(optimizer):
     return ','.join(['{:.6f}'.format(param_group['lr']) for param_group in optimizer.param_groups])
 
 
+import torch
+
 def collate_fn(batch):
     videos = [sample['video'] for sample in batch]
     labels = [sample['label'] for sample in batch]
@@ -60,7 +62,19 @@ def collate_fn(batch):
 
     # Pad durations to have the same length
     padded_durations = []
-    for duration in
+    for duration in durations:
+        if duration.size(0) < max_duration:
+            padding_duration = [duration[-1]] * (max_duration - duration.size(0))
+            padding_duration = torch.stack(padding_duration)
+            padded_duration = torch.cat((duration, padding_duration), dim=0)
+        else:
+            padded_duration = duration
+        padded_durations.append(padded_duration)
+
+    # Convert the padded durations to a tensor
+    durations_tensor = torch.stack(padded_durations)
+
+    return {'video': videos_tensor, 'label': labels_tensor, 'duration': durations_tensor}
 
 
 
