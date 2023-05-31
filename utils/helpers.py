@@ -57,7 +57,7 @@ def collate_fn(batch):
 
     # Determine the maximum duration in the batch
     if durations:
-        max_duration = max([duration.size(0) for duration in durations])
+        max_duration = max([duration.size(0) for duration in durations if len(duration.size()) > 0])
     else:
         max_duration = 0
 
