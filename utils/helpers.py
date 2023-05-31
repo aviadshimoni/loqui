@@ -30,14 +30,29 @@ def show_lr(optimizer):
     return ','.join(['{:.6f}'.format(param_group['lr']) for param_group in optimizer.param_groups])
 
 
+def custom_collate(batch):
+    # Extract the individual samples from the batch
+    videos, labels = zip(*batch)
+
+    # Stack the video frames along the sequence length dimension
+    videos = torch.stack(videos, dim=1)
+
+    # Convert labels to a tensor
+    labels = torch.tensor(labels)
+
+    return videos, labels
+
+
 def dataset2dataloader(dataset, batch_size, num_workers, shuffle=True):
     loader = DataLoader(dataset,
                         batch_size=batch_size,
                         num_workers=num_workers,
                         shuffle=shuffle,
                         drop_last=False,
-                        pin_memory=True)
+                        pin_memory=True,
+                        collate_fn=custom_collate)
     return loader
+
 
 
 def get_prediction(video_model, video, border, is_border=False):
