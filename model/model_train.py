@@ -33,7 +33,7 @@ def train(lr: float, batch_size: int, n_class: int, max_epoch: int, num_workers:
     """
 
     os.environ['CUDA_VISIBLE_DEVICES'] = gpus
-    os.environ['CUDA_LAUNCH_BLOCKING'] = 1
+    os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
 
     video_model = VideoModel(n_class, is_border=is_border, se=se).cuda()
 
