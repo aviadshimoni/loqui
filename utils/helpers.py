@@ -60,6 +60,7 @@ def collate_fn(batch):
     for duration in durations:
         padding_duration = [duration[-1]] * (max_duration - len(duration))
         padding_duration = torch.tensor(padding_duration)
+        duration = torch.tensor(duration)  # Convert duration to tensor
         padded_duration = torch.cat((duration, padding_duration), dim=0)
         padded_durations.append(padded_duration)
 
