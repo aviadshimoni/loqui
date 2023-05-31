@@ -41,9 +41,12 @@ def collate_fn(batch):
     # Pad videos to have the same length
     padded_videos = []
     for video in videos:
-        padding_frames = [video[-1]] * (max_frame_count - video.size(0))
-        padding_frames = torch.stack(padding_frames)
-        padded_video = torch.cat((video, padding_frames), dim=0)
+        if video.size(0) < max_frame_count:
+            padding_frames = [video[-1]] * (max_frame_count - video.size(0))
+            padding_frames = torch.stack(padding_frames)
+            padded_video = torch.cat((video, padding_frames), dim=0)
+        else:
+            padded_video = video
         padded_videos.append(padded_video)
 
     # Convert the padded videos to a tensor
@@ -58,17 +61,19 @@ def collate_fn(batch):
     # Pad durations to have the same length
     padded_durations = []
     for duration in durations:
-        padding_duration = [duration[-1]] * (max_duration - duration.size(0))
-        padding_duration = torch.stack(padding_duration)
-        duration = torch.stack(duration)  # Convert duration to tensor
-        padded_duration = torch.cat((duration, padding_duration), dim=0)
+        if duration.size(0) < max_duration:
+            padding_duration = [duration[-1]] * (max_duration - duration.size(0))
+            padding_duration = torch.stack(padding_duration)
+            duration = torch.stack(duration)  # Convert duration to tensor
+            padded_duration = torch.cat((duration, padding_duration), dim=0)
+        else:
+            padded_duration = duration
         padded_durations.append(padded_duration)
 
     # Convert the padded durations to a tensor
     durations_tensor = torch.stack(padded_durations)
 
     return {'video': videos_tensor, 'label': labels_tensor, 'duration': durations_tensor}
-
 
 
 
