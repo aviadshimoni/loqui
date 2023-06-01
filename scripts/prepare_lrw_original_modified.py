@@ -67,10 +67,16 @@ class LRWDataset(Dataset):
         name = self.list[idx][0]
         labels = self.list[idx][1]
 
-        result['video'] = inputs
-        result['label'] = int(labels)
-        result['duration'] = self.generate_duration(inputs)
-        result['video'] = self.standardize_video_length(result['video'])
+        try:
+            result['video'] = inputs
+            result['label'] = int(labels)
+            result['duration'] = self.generate_duration(inputs)
+            result['video'] = self.standardize_video_length(result['video'])
+
+        except Exception as e:
+            print(f"Error processing video: {name}")
+            print(f"Error message: {str(e)}")
+            return None
 
         savename = self.list[idx][0].replace('lrw_mp4', target_dir).replace('.mp4', '.pkl')
         torch.save(result, savename)
