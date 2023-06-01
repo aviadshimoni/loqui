@@ -21,7 +21,7 @@ def ensure_dir(directory: str) -> None:
         os.makedirs(directory)
 
 def load_duration(file: str) -> np.array:
-    with open(file, 'r') as f:
+    with codecs.open(file, 'r', encoding='utf-8', errors='ignore') as f:
         lines = f.readlines()
 
         for line in lines:
