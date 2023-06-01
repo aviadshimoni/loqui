@@ -15,9 +15,12 @@ def extract_opencv(filename):
     while (cap.isOpened()):
         ret, frame = cap.read()  # BGR
         if ret:
-            frame = frame[115:211, 79:175]
-            frame = jpeg.encode(frame)
-            video.append(frame)
+            frame_height, frame_width = frame.shape[:2]
+            # Ensure the frame size is within the expected range
+            if frame_height >= 211 and frame_width >= 175:
+                frame = frame[115:211, 79:175]
+                frame = jpeg.encode(frame)
+                video.append(frame)
         else:
             break
     cap.release()
@@ -29,6 +32,7 @@ def extract_opencv(filename):
         video.extend(padding_frames)
 
     return video
+
 
 
 def ensure_dir(directory: str) -> None:
