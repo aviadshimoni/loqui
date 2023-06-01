@@ -109,6 +109,7 @@ class LRWDataset(Dataset):
 
         if num_frames > 0:
             frame_indices = np.linspace(0, num_frames - 1, min(29, num_frames), dtype=int)
+            frame_indices = np.clip(frame_indices, 0, num_frames - 1)  # Clip indices to valid range
             duration[frame_indices] = True
 
         return duration
