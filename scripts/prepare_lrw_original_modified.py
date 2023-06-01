@@ -70,7 +70,7 @@ class LRWDataset(Dataset):
         try:
             result['video'] = inputs
             result['label'] = int(labels)
-            result['duration'] = self.generate_duration(inputs)
+            result['duration'] = self.load_duration(self.list[idx][0]).astype(np.bool)
             result['video'] = self.standardize_video_length(result['video'])
 
         except Exception as e:
@@ -85,6 +85,18 @@ class LRWDataset(Dataset):
 
     def __len__(self):
         return len(self.list)
+
+    def load_duration(self, file):
+        txt_file = file.replace('.mp4', '.txt')
+        if os.path.exists(txt_file):
+            with open(txt_file, 'r') as f:
+                lines = f.readlines()
+                for line in lines:
+                    if line.find('Duration') != -1:
+                        duration = float(line.split(' ')[1])
+                        return np.full(29, True, dtype=bool)
+
+        return self.generate_duration(extract_opencv(file))
 
     def generate_duration(self, video):
         num_frames = len(video)
