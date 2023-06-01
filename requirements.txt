@@ -4,4 +4,3 @@ opencv-python >= 4.1.0
 PyTurboJPEG
 matplotlib~=3.7.1
 moviepy
-codecs
