@@ -70,7 +70,7 @@ class LRWDataset(Dataset):
         try:
             result['video'] = inputs
             result['label'] = int(labels)
-            result['duration'] = self.load_duration(self.list[idx][0]).astype(bool)
+            result['duration'] = self.load_duration(self.list[idx][0]).astype(np.bool_)
             result['video'] = self.standardize_video_length(result['video'])
 
         except Exception as e:
