@@ -21,13 +21,21 @@ def ensure_dir(directory: str) -> None:
     if not os.path.exists(directory):
         os.makedirs(directory)
 
+import codecs
+
 def load_duration(file: str) -> np.array:
     with codecs.open(file, 'r', encoding='utf-8', errors='ignore') as f:
         lines = f.readlines()
 
+        duration = None
+
         for line in lines:
             if line.find('Duration') != -1:
                 duration = float(line.split(' ')[1])
+                break
+
+        if duration is None:
+            raise ValueError("Duration not found in the file.")
 
     tensor = np.zeros(29)
     mid = 29 / 2
@@ -36,6 +44,7 @@ def load_duration(file: str) -> np.array:
     tensor[start:end] = 1.0
 
     return tensor.astype(np.bool_)
+
 
 def extract_opencv(file_name: str, roi_coordinates: tuple) -> tuple:
     video = []
