@@ -7,6 +7,7 @@ import numpy as np
 from turbojpeg import TurboJPEG
 from torch.utils.data import Dataset, DataLoader
 from moviepy.editor import VideoFileClip
+import codecs
 
 jpeg = TurboJPEG()
 
