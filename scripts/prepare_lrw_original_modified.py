@@ -114,20 +114,20 @@ class LRWDataset(Dataset):
         if num_frames < desired_length:
             # Temporal interpolation
             interpolated_video = []
-            frame_indices = np.linspace(0, num_frames - 1, desired_length, dtype=int)
+            frame_indices = np.linspace(0, num_frames - 1, desired_length, endpoint=True)
 
             for index in frame_indices:
-                interpolated_video.append(video[index])
+                interpolated_video.append(video[int(index)])
 
             return interpolated_video
 
         elif num_frames > desired_length:
             # Temporal subsampling
             subsampled_video = []
-            frame_indices = np.linspace(0, num_frames - 1, desired_length, dtype=int)
+            frame_indices = np.linspace(0, num_frames - 1, desired_length, endpoint=True)
 
             for index in frame_indices:
-                subsampled_video.append(video[index])
+                subsampled_video.append(video[int(index)])
 
             return subsampled_video
 
