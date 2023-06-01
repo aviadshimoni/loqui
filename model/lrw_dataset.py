@@ -17,7 +17,7 @@ class LRWDataset(LRWDatasetInterface):
     """
 
     def __init__(self, phase, dataset_prefix: str,
-                 labels_path: str = "label_sorted.txt") -> None:
+                 labels_path: str = "/tf/loqui/label_sorted_5.txt") -> None:
         self.phase = phase  # train/val/test
         self.dataset_prefix = dataset_prefix
         self.labels_path = labels_path
@@ -42,7 +42,7 @@ class LRWDataset(LRWDatasetInterface):
         lst = []
 
         for i, label in enumerate(self.labels):
-            files = glob.glob(join(self.dataset_prefix, "lrw_roi_npy_gray_pkl_jpeg", label, self.phase, "*.pkl"))
+            files = glob.glob(join(self.dataset_prefix, "custom_lipread_pkls", label, self.phase, "*.pkl"))
             files = sorted(files)
 
             lst += [file for file in files]
