@@ -75,6 +75,7 @@ def extract_opencv(file_name: str, roi_coordinates: tuple) -> tuple:
 
     return video, frame_count
 
+
 target_dir = '/tf/loqui/custom_lipread_pkls'
 ensure_dir(target_dir)
 

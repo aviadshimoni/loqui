@@ -1,4 +1,3 @@
-# encoding: utf-8
 import cv2
 from turbojpeg import TurboJPEG
 import torch
@@ -22,7 +21,15 @@ def extract_opencv(filename):
         else:
             break
     cap.release()
+
+    # Pad the video with duplicate frames if it has less than 29 frames
+    target_frame_count = 29
+    if len(video) < target_frame_count:
+        padding_frames = video[-1:] * (target_frame_count - len(video))
+        video.extend(padding_frames)
+
     return video
+
 
 def ensure_dir(directory: str) -> None:
     if not os.path.exists(directory):
@@ -111,7 +118,7 @@ class LRWDataset(Dataset):
 
 if __name__ == '__main__':
     loader = DataLoader(LRWDataset("/tf/Daniel/custom_lipread_mp4"),
-                        batch_size=48,
+                        batch_size=96,
                         num_workers=2,
                         shuffle=False,
                         drop_last=False)
