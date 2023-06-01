@@ -7,7 +7,7 @@ import utils.augmenter as data_augmenter
 from turbojpeg import TJPF_GRAY
 from os.path import join, dirname, realpath
 from interfaces.lrw_dataset_interface import LRWDatasetInterface
-
+from scripts.prepare_lrw import load_duration
 
 class LRWDataset(LRWDatasetInterface):
     """
@@ -50,29 +50,25 @@ class LRWDataset(LRWDatasetInterface):
         return lst
 
     def __getitem__(self, idx: int) -> dict:
-        """
-        implements the operator []
-        :param idx: index to return of the dataset object
-        :return: by given index, return the respectively data on that index
-        """
-
         tensor = torch.load(self.list[idx])
         inputs = tensor.get("video")
         inputs = [sg.jpeg.decode(img, pixel_format=TJPF_GRAY) for img in inputs]
         inputs = np.stack(inputs, 0) / 255.0
         inputs = inputs[:, :, :, 0]
 
-        # TODO check what type inputs is and update the augmentation functions documentations
+        duration = load_duration(self.list[idx])  # Load duration using the load_duration function
+
         if self.phase == "train":
             batch_img = data_augmenter.random_crop(inputs, (88, 88))
             batch_img = data_augmenter.horizontal_flip(batch_img)
         else:  # phase in ["val", "test"]
             batch_img = data_augmenter.center_crop(inputs, (88, 88))
 
-        result = {"video": torch.FloatTensor(batch_img[:, np.newaxis, ...]),
-                  "label": tensor.get("label"),
-                  "duration": 1.0 * tensor.get("duration")}
-        # print(result["video"].size())
+        result = {
+            "video": torch.FloatTensor(batch_img[:, np.newaxis, ...]),
+            "label": tensor.get("label"),
+            "duration": torch.FloatTensor(duration)  # Convert duration to a tensor
+        }
 
         return result
 
