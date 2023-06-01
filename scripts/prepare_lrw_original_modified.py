@@ -103,7 +103,7 @@ class LRWDataset(Dataset):
         duration = np.zeros(29, dtype=bool)
 
         if num_frames > 0:
-            frame_indices = np.linspace(0, num_frames - 1, 29, dtype=int)
+            frame_indices = np.linspace(0, num_frames - 1, min(29, num_frames), dtype=int)
             duration[frame_indices] = True
 
         return duration
