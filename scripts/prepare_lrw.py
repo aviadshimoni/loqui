@@ -36,7 +36,7 @@ def load_duration(file: str) -> np.array:
 
     return tensor.astype(np.bool_)
 
-def extract_opencv(file_name: str, roi_coordinates: tuple) -> list:
+def extract_opencv(file_name: str, roi_coordinates: tuple) -> tuple:
     video = []
     cap = cv2.VideoCapture(file_name)
     frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
@@ -63,7 +63,7 @@ def extract_opencv(file_name: str, roi_coordinates: tuple) -> list:
         padding_frames = video[-1:] * (target_frame_count - len(video))
         video.extend(padding_frames)
 
-    return video
+    return video, frame_count
 
 target_dir = '/tf/loqui/custom_lipread_pkls'
 ensure_dir(target_dir)
@@ -92,7 +92,7 @@ class LRWDataset(Dataset):
 
     def __getitem__(self, idx: int) -> dict:
         video_path, label = self.data[idx]
-        inputs = extract_opencv(video_path, roi_coordinates=self.roi_coordinates)
+        inputs, frame_count = extract_opencv(video_path, roi_coordinates=self.roi_coordinates)
 
         metadata_file = video_path.replace('.mp4', '.txt')
 
@@ -117,6 +117,7 @@ class LRWDataset(Dataset):
 
     def __len__(self) -> int:
         return len(self.data)
+
 
 def main():
     loader = DataLoader(
