@@ -34,8 +34,6 @@ def extract_opencv(filename):
     return video
 
 
-
-
 def ensure_dir(directory: str) -> None:
     if not os.path.exists(directory):
         os.makedirs(directory)
@@ -48,7 +46,7 @@ ensure_dir(target_dir)
 class LRWDataset(Dataset):
     def __init__(self, mp4_path='lrw_mp4'):
         self.mp4_path = mp4_path
-        with open('/tf/loqui/label_sorted.txt') as myfile:
+        with open('/tf/loqui/label_sorted_5.txt') as myfile:
             self.labels = myfile.read().splitlines()
 
         self.list = []
@@ -70,6 +68,9 @@ class LRWDataset(Dataset):
         result = {}
 
         name = self.list[idx][0]
+        if 'ACTION' in name:
+            print(f"File name contains 'ACTION': {name}")
+
         labels = self.list[idx][1]
 
         try:
