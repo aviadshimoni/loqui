@@ -68,8 +68,12 @@ class LRWDataset(Dataset):
         result = {}
 
         name = self.list[idx][0]
-        if 'ACTION' in name:
-            print(f"File name contains 'ACTION': {name}")
+        if 'ACTION_01003' in name:
+            print(self.list[idx])
+        elif 'ACTION_00022' in name:
+            print(self.list[idx])
+
+
 
         labels = self.list[idx][1]
 
