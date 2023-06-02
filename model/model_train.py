@@ -59,19 +59,22 @@ def train(lr: float, batch_size: int, n_class: int, max_epoch: int, num_workers:
     scaler = GradScaler()
 
     for epoch in range(max_epoch):
+        logger.info(f"Starting epoch: {epoch}")
         train_loss = 0.0
 
         for i_iteration, sample in enumerate(loader):
             start_time = time.time()
             video_model.train()
+            logger.info(f"epoch: {epoch}, iteration: {i_iteration}")
             video, label, border = helpers.prepare_data(sample)
-
+            logger.info(f"got video, label and border")
             loss = helpers.calculate_loss(mixup, alpha, video_model, video, label, border, is_border=is_border)
+            logger.info(f"calculated loss")
             optim_video.zero_grad()
             scaler.scale(loss['CE V']).backward()
             scaler.step(optim_video)
             scaler.update()
-
+            logger.info(f"updated scaler")
             train_loss += loss['CE V'].item()
             end_time = time.time()
 
