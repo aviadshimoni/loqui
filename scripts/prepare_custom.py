@@ -2,8 +2,9 @@ import os
 from torch.utils.data import Dataset, DataLoader
 import torch
 import glob
+import cv2
 import numpy as np
-
+from turbojpeg import TurboJPEG
 jpeg = TurboJPEG()
 
 
