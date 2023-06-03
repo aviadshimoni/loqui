@@ -6,6 +6,7 @@ import numpy as np
 from torch.cuda.amp import autocast
 import torch
 import matplotlib.pyplot as plt
+import cv2
 
 
 def parallel_model(model):
@@ -127,3 +128,26 @@ def get_logger(name):
     logging.basicConfig(level=logging.INFO, format='%(message)s')
     logger = logging.getLogger(name)
     return logger
+
+
+def preprocess_frames(frames, input_shape):
+    # Convert frames to numpy arrays
+    frames = [np.array(frame, dtype=np.uint8) for frame in frames]
+
+    # Resize the frames
+    resized_frames = [cv2.resize(frame, input_shape) for frame in frames]
+
+    # Convert frames to grayscale
+    grayscale_frames = [cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) for frame in resized_frames]
+
+    # Normalize the frames
+    normalized_frames = [(frame / 255.0).astype(np.float32) for frame in grayscale_frames]
+
+    # Stack frames to create a tensor with shape [num_frames, height, width]
+    tensor_frames = np.stack(normalized_frames)
+
+    # Add a channel dimension to the tensor
+    tensor_frames = np.expand_dims(tensor_frames, axis=1)
+
+    # Convert frames to tensor
+    tensor_frames = torch.tensor(tensor_frames)
