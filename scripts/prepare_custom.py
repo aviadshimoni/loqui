@@ -35,7 +35,7 @@ class LRWDataset(Dataset):
         with open('/tf/loqui/label_sorted_5.txt') as myfile:
             self.labels = myfile.read().splitlines()
 
-        self.list = []
+        self.data = []
 
         for (i, label) in enumerate(self.labels):
             files = glob.glob(os.path.join(self.mp4_path, label, '*', '*.mp4'))
@@ -47,7 +47,7 @@ class LRWDataset(Dataset):
 
             files = sorted(files)
 
-            self.list += [(file, i) for file in files]
+            self.data += [(file, i) for file in files]
 
     def __getitem__(self, idx: int) -> dict:
         video_path, label = self.data[idx]
@@ -59,7 +59,7 @@ class LRWDataset(Dataset):
             duration = self.load_duration(metadata_file)
             print(f"duration lrw mp4: {duration}")
         else:
-            duration = duration = [False, False, False] + [True] * 13 + [False, False, False]
+            duration = [False, False, False] + [True] * 13 + [False, False, False]
 
         result = {
             'video': inputs,
@@ -72,7 +72,7 @@ class LRWDataset(Dataset):
 
         return result
     def __len__(self):
-        return len(self.list)
+        return len(self.data)
 
     def load_duration(self, file):
         with open(file, 'r') as f:
