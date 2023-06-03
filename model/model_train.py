@@ -42,6 +42,7 @@ def train(lr: float, batch_size: int, n_class: int, max_epoch: int, num_workers:
 
     if weights is not None:
         logger.info('load weights')
+        logger.info("Aviad and Mulat")
         weight = torch.load(weights, map_location=torch.device('cpu'))
         helpers.load_missing(video_model, weight.get('video_model'))
 
