@@ -61,7 +61,7 @@ class LRWDataset(LRWDatasetInterface):
         inputs = [sg.jpeg.decode(img, pixel_format=TJPF_GRAY) for img in inputs]
         inputs = np.stack(inputs, 0) / 255.0
         inputs = inputs[:, :, :, 0]
-        duration = float(tensor.get("duration", 0))  # Convert duration to float
+        duration = np.array(tensor.get("duration", np.zeros(29)))
         label = int(tensor.get("label"))
 
         # TODO check what type inputs is and update the augmentation functions documentations
@@ -73,7 +73,7 @@ class LRWDataset(LRWDatasetInterface):
 
         result = {"video": torch.FloatTensor(batch_img[:, np.newaxis, ...]),
                   "label": label,
-                  "duration": 1.0 * duration}
+                  "duration": np.sum(duration).astype(float)}
         # print(result["video"].size())
 
         return result
