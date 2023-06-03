@@ -62,6 +62,7 @@ class LRWDataset(LRWDatasetInterface):
         inputs = np.stack(inputs, 0) / 255.0
         inputs = inputs[:, :, :, 0]
         duration = float(tensor.get("duration", 0))  # Convert duration to float
+        label = int(tensor.get("label")
 
         # TODO check what type inputs is and update the augmentation functions documentations
         if self.phase == "train":
@@ -71,8 +72,8 @@ class LRWDataset(LRWDatasetInterface):
             batch_img = data_augmenter.center_crop(inputs, (88, 88))
 
         result = {"video": torch.FloatTensor(batch_img[:, np.newaxis, ...]),
-                  "label": tensor.get("label"),
-                  "duration": 1.0 * duration
+                  "label": label,
+                  "duration": 1.0 * duration}
         # print(result["video"].size())
 
         return result
