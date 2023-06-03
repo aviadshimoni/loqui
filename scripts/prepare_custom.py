@@ -23,7 +23,7 @@ def extract_opencv(filename):
     return video
 
 
-target_dir = '/tf/Daniel/aviad_custom_pkls'
+target_dir = '/tf/Daniel/aviv_pkls'
 
 if (not os.path.exists(target_dir)):
     os.makedirs(target_dir)
@@ -59,7 +59,7 @@ class LRWDataset(Dataset):
             duration = self.load_duration(metadata_file)
             print(f"duration lrw mp4: {duration}")
         else:
-            duration = [False, False, False] + [True] * 13 + [False, False, False]
+            duration = [0. * 3, 1. * 23, 0. * 3]
 
         result = {
             'video': inputs,
