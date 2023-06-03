@@ -82,14 +82,13 @@ def train(lr: float, batch_size: int, n_class: int, max_epoch: int, num_workers:
                 acc, msg = validation(video_model, batch_size)
                 train_accs.append(acc)
 
-                if acc > best_acc:
-                    saved_file = f'{save_prefix}_iter_{tot_iter}_epoch_{epoch}_{msg}.pt'
+                saved_file = f'{save_prefix}_iter_{tot_iter}_epoch_{epoch}_{msg}.pt'
 
-                    temp = os.path.split(saved_file)[0]
-                    if not os.path.exists(temp):
-                        os.makedirs(temp)
+                temp = os.path.split(saved_file)[0]
+                if not os.path.exists(temp):
+                    os.makedirs(temp)
 
-                    torch.save({'video_model': video_model.module.state_dict()}, saved_file)
+                torch.save({'video_model': video_model.module.state_dict()}, saved_file)
 
                 if tot_iter != 0:
                     best_acc = max(acc, best_acc)

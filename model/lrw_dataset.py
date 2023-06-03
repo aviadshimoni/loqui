@@ -17,7 +17,7 @@ class LRWDataset(LRWDatasetInterface):
     """
 
     def __init__(self, phase, dataset_prefix: str = join(dirname(dirname(realpath(__file__))), "dataset"),
-                 labels_path: str = "label_sorted.txt") -> None:
+                 labels_path: str = "/tf/loqui/label_sorted_5.txt") -> None:
         self.phase = phase  # train/val/test
         self.dataset_prefix = dataset_prefix
         self.labels_path = labels_path
@@ -42,8 +42,7 @@ class LRWDataset(LRWDatasetInterface):
         lst = []
 
         for i, label in enumerate(self.labels):
-            files = glob.glob(join(self.dataset_prefix, "custom_lipread_pkls", label, self.phase, "*.pkl"))
-            # files = glob.glob(join(self.dataset_prefix, "../Daniel/custom_lipread_mp4", label, self.phase, "*.pkl"))
+            files = glob.glob(join(self.dataset_prefix, "aviad_custom_pkls", label, self.phase, "*.pkl"))
             files = sorted(files)
 
             lst += [file for file in files]
@@ -56,6 +55,7 @@ class LRWDataset(LRWDatasetInterface):
         :param idx: index to return of the dataset object
         :return: by given index, return the respectively data on that index
         """
+
         tensor = torch.load(self.list[idx])
         inputs = tensor.get("video")
         inputs = [sg.jpeg.decode(img, pixel_format=TJPF_GRAY) for img in inputs]
@@ -66,13 +66,11 @@ class LRWDataset(LRWDatasetInterface):
         if self.phase == "train":
             batch_img = data_augmenter.random_crop(inputs, (88, 88))
             batch_img = data_augmenter.horizontal_flip(batch_img)
-
         else:  # phase in ["val", "test"]
             batch_img = data_augmenter.center_crop(inputs, (88, 88))
 
         result = {"video": torch.FloatTensor(batch_img[:, np.newaxis, ...]),
-                  "label": tensor.get("label"),
-                  "duration": 1.0 * tensor.get("duration")}
+                  "label": tensor.get("label")}
         # print(result["video"].size())
 
         return result
@@ -82,5 +80,7 @@ class LRWDataset(LRWDatasetInterface):
         implements the len operator
         :return: len of self.list
         """
-
         return len(self.list)
+
+    def get_labels(self):
+        return self.labels

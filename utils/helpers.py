@@ -12,6 +12,7 @@ def parallel_model(model):
 
 def load_missing(model, pretrained_dict):
     model_dict = model.state_dict()
+
     pretrained_dict = {k: v for k, v in pretrained_dict.items() if
                        k in model_dict.keys() and v.size() == model_dict[k].size()}
     missed_params = [k for k, v in model_dict.items() if not k in pretrained_dict.keys()]
@@ -35,7 +36,6 @@ def dataset2dataloader(dataset, batch_size, num_workers, shuffle=True):
                         shuffle=shuffle,
                         drop_last=False,
                         pin_memory=True)
-
     return loader
 
 
