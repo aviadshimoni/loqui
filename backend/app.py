@@ -1,6 +1,4 @@
 import torch
-from torchvision.transforms import CenterCrop, Grayscale
-import transforms
 from utils.helpers import load_missing
 from scripts.prepare_lrw import extract_opencv
 from flask import Flask, request, jsonify
