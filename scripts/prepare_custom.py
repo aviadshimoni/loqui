@@ -32,7 +32,7 @@ if (not os.path.exists(target_dir)):
 class LRWDataset(Dataset):
     def __init__(self, mp4_path='lrw_mp4'):
         self.mp4_path = mp4_path
-        with open('/tf/loqui/label_sorted_5.txt') as myfile:
+        with open('label_sorted.txt') as myfile:
             self.labels = myfile.read().splitlines()
 
         self.data = []
@@ -42,7 +42,7 @@ class LRWDataset(Dataset):
             for file in files:
                 savefile = file.replace(self.mp4_path, target_dir).replace('.mp4', '.pkl')
                 savepath = os.path.split(savefile)[0]
-                if (not os.path.exists(savepath)):
+                if not os.path.exists(savepath):
                     os.makedirs(savepath)
 
             files = sorted(files)
@@ -59,7 +59,7 @@ class LRWDataset(Dataset):
             duration = self.load_duration(metadata_file)
             print(f"duration lrw mp4: {duration}")
         else:
-            duration = [0. * 3, 1. * 23, 0. * 3]
+            duration = np.array([0.0] * 3 + [1.0] * 23 + [0.0] * 3)  # Update duration values
 
         result = {
             'video': inputs,
@@ -71,6 +71,7 @@ class LRWDataset(Dataset):
         torch.save(result, output)
 
         return result
+
     def __len__(self):
         return len(self.data)
 
@@ -89,7 +90,7 @@ class LRWDataset(Dataset):
         return tensor
 
 
-if (__name__ == '__main__'):
+if __name__ == '__main__':
     loader = DataLoader(LRWDataset("/tf/Daniel/lipread_mp4"),
                         batch_size=96,
                         num_workers=2,
