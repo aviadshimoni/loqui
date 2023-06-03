@@ -62,7 +62,7 @@ class LRWDataset(LRWDatasetInterface):
         inputs = np.stack(inputs, 0) / 255.0
         inputs = inputs[:, :, :, 0]
         duration = float(tensor.get("duration", 0))  # Convert duration to float
-        label = int(tensor.get("label")
+        label = int(tensor.get("label"))
 
         # TODO check what type inputs is and update the augmentation functions documentations
         if self.phase == "train":
