@@ -8,11 +8,11 @@ from model.model import VideoModel
 app = Flask(__name__)
 
 labels = []
-with open('label_sorted.txt') as myfile:
+with open('/tf/loqui/label_sorted_full.txt') as myfile:
     labels = myfile.read().splitlines()
 
 video_model = VideoModel(5)
-weights_file = "weights/loqui_daniel/checkpoints/few_shot/_iter_4837_epoch_58_v_acc_0.97710_.pt"
+weights_file = "/tf/weights/lrw-cosine-lr-acc-0.85080.pt"
 weight = torch.load(weights_file, map_location=torch.device('cpu'))
 load_missing(video_model, weight.get('video_model'))
 video_model.eval()
