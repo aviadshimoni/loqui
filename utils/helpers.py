@@ -47,6 +47,7 @@ def get_prediction(video_model, video, border, is_border=False):
     """
 
     if is_border:
+        print(f"is_border is true, border is: {border}")
         return video_model(video, border)
     return video_model(video)
 

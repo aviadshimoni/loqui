@@ -60,6 +60,7 @@ class VideoModel(nn.Module, metaclass=Singleton):
             f_v = self.dropout(f_v)
 
         if self.is_border:
+            print(f"border inside the object is: {border}")
             border = border[:, :, None]
             h, _ = self.gru(torch.cat([f_v, border], -1))
         else:
