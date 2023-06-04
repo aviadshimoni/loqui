@@ -42,7 +42,7 @@ class LRWDataset(LRWDatasetInterface):
         lst = []
 
         for i, label in enumerate(self.labels):
-            files = glob.glob(join(self.dataset_prefix, "/tf/Daniel/aviv_pkls", label, self.phase, "*.pkl"))
+            files = glob.glob(join(self.dataset_prefix, "/tf/Daniel/aviv_new_pkls", label, self.phase, "*.pkl"))
             files = sorted(files)
 
             lst += [file for file in files]
