@@ -60,10 +60,10 @@ class VideoModel(nn.Module, metaclass=Singleton):
             f_v = self.dropout(f_v)
 
         if self.is_border:
-            print(f"border inside the object is: {border}\nf_v: {f_v}")
+            # print(f"border inside the object is: {border}\nf_v: {f_v}")
             # border = border[:, :, None]
             border = border.unsqueeze(0).unsqueeze(0)
-            print(f"border inside the object is AFTER CHANGE: {border}\nf_v: {f_v}")
+            # print(f"border inside the object is AFTER CHANGE: {border}\nf_v: {f_v}")
             h, _ = self.gru(torch.cat([f_v, border], -1))
         else:
             h, _ = self.gru(f_v)
