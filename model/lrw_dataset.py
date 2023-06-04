@@ -17,7 +17,7 @@ class LRWDataset(LRWDatasetInterface):
     """
 
     def __init__(self, phase, dataset_prefix: str,
-                 labels_path: str = "label_sorted_5.txt") -> None:
+                 labels_path: str = "label_sorted_30.txt") -> None:
         self.phase = phase  # train/val/test
         self.dataset_prefix = dataset_prefix
         self.labels_path = labels_path
