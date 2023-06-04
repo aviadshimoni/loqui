@@ -5,22 +5,8 @@ import glob
 import cv2
 import numpy as np
 from turbojpeg import TurboJPEG
+from utils.helpers import extract_opencv
 jpeg = TurboJPEG()
-
-
-def extract_opencv(filename):
-    video = []
-    cap = cv2.VideoCapture(filename)
-    while cap.isOpened():
-        ret, frame = cap.read()  # BGR
-        if ret:
-            frame = frame[115:211, 79:175]
-            frame = jpeg.encode(frame)
-            video.append(frame)
-        else:
-            break
-    cap.release()
-    return video
 
 
 target_dir = '/tf/Daniel/pkls_test' # REPLACE ME

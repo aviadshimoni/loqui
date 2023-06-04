@@ -1,107 +1,85 @@
 import torch
-from utils.helpers import load_missing
-from scripts.prepare_lrw import extract_opencv
+from utils.helpers import load_missing, extract_opencv
 from flask import Flask, request, jsonify
 from model.model import VideoModel
-import cv2
 import numpy as np
+import tempfile
+import cv2
+
 app = Flask(__name__)
 
 labels = []
-with open('/tf/loqui/label_sorted_full.txt') as myfile:
+with open('label_sorted_full.txt') as myfile:
     labels = myfile.read().splitlines()
 
-video_model = VideoModel(5)
-weights_file = "/tf/weights/lrw-cosine-lr-acc-0.85080.pt"
+video_model = VideoModel(500)
+weights_file = "weights/lrw-cosine-lr-acc-0.85080.pt"
 weight = torch.load(weights_file, map_location=torch.device('cpu'))
 load_missing(video_model, weight.get('video_model'))
 video_model.eval()
 
 
-import tempfile
+def preprocess_frames(frames):
+    input_shape = (1, 1, 1, 88, 88)  # Adjust the dimensions according to the model's requirements
+    tensor_frames = []
 
-@app.route('/predict', methods=['POST'])
-def predict():
-    file = request.files['file']
-
-    # Create a temporary file to write the resized and processed frames
-    with tempfile.NamedTemporaryFile(suffix='.mp4') as tmp_file:
-        # Read the input video file
-        video = cv2.VideoCapture(file)
-
-        # Get the total number of frames in the video
-        total_frames = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
-
-        # Determine the indices of frames to extract
-        target_num_frames = 29
-        if total_frames > target_num_frames:
-            indices = np.linspace(0, total_frames - 1, target_num_frames, dtype=np.int)
+    for frame in frames:
+        if isinstance(frame, bytes):
+            # Handle frames received as bytes (assuming encoded frames)
+            nparr = np.frombuffer(frame, np.uint8)
+            img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
         else:
-            indices = np.arange(total_frames)
+            # Handle frames received as numpy arrays
+            img = frame
 
-        # OpenCV VideoWriter to write the resized frames to the temporary file
-        fps = video.get(cv2.CAP_PROP_FPS)
-        width = int(video.get(cv2.CAP_PROP_FRAME_WIDTH))
-        height = int(video.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-        writer = cv2.VideoWriter(tmp_file.name, fourcc, fps, (width, height))
+        # Convert the frame to grayscale
+        gray_frame = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-        # Read and process each frame
-        frame_counter = 0
-        while frame_counter < total_frames:
-            success, frame = video.read()
-            if success:
-                if frame_counter in indices:
-                    # Resize the frame
-                    resized_frame = cv2.resize(frame, (256, 256))
-                    writer.write(resized_frame)
-                frame_counter += 1
-            else:
-                break
+        # Resize the frame to the desired input shape
+        resized_frame = cv2.resize(gray_frame, (input_shape[-1], input_shape[-1]))
 
-        # Release the VideoCapture and VideoWriter objects
-        video.release()
-        writer.release()
+        # Normalize the frame
+        normalized_frame = (resized_frame / 255.0).astype(np.float32)
 
-        # Extract frames using OpenCV from the temporary file
-        raw_frames = extract_opencv(tmp_file.name)
+        # Add frame to the list of processed frames
+        tensor_frame = np.expand_dims(normalized_frame, axis=(0, 1))  # Add extra dimensions
+        tensor_frames.append(tensor_frame)
 
-        # Preprocess the frames
-        frames = preprocess_frames(raw_frames)
+    # Stack frames to create a tensor with shape [num_frames, channels, time, height, width]
+    tensor_frames = np.concatenate(tensor_frames, axis=0)
 
-        # Pass the frames through the model
-        with torch.no_grad():
-            predictions = video_model(frames)
-            predicted_label = torch.argmax(predictions)
-            predicted_label = predicted_label.item()
-
-        predicted_class = labels[predicted_label]
-        return jsonify({'predicted_class': predicted_class})
-
-
-def preprocess_frames(frames, input_shape=(88,88)):
-    # Convert frames to numpy arrays
-    frames = [np.array(frame, dtype=np.uint8) for frame in frames]
-
-    # Resize the frames
-    resized_frames = [cv2.resize(frame, input_shape) for frame in frames]
-
-    # Convert frames to grayscale
-    grayscale_frames = [cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) for frame in resized_frames]
-
-    # Normalize the frames
-    normalized_frames = [(frame / 255.0).astype(np.float32) for frame in grayscale_frames]
-
-    # Stack frames to create a tensor with shape [num_frames, height, width]
-    tensor_frames = np.stack(normalized_frames)
-
-    # Add a channel dimension to the tensor
-    tensor_frames = np.expand_dims(tensor_frames, axis=1)
+    # Add an extra dimension for batch size
+    tensor_frames = np.expand_dims(tensor_frames, axis=0)
 
     # Convert frames to tensor
     tensor_frames = torch.tensor(tensor_frames)
 
     return tensor_frames
+
+
+
+@app.route('/predict', methods=['POST'])
+def predict():
+    file = request.files['file']
+
+    with tempfile.NamedTemporaryFile(suffix='.mp4') as tmp_file:
+        file.save(tmp_file.name)
+
+        # Extract frames using OpenCV from the temporary file
+        raw_frames = extract_opencv(tmp_file.name)
+
+    # Preprocess the frames
+    frames = preprocess_frames(raw_frames)
+
+    # Pass the frames through the model
+    with torch.no_grad():
+        predictions = video_model(frames)
+        predicted_label = torch.argmax(predictions)
+        predicted_label = predicted_label.item()
+
+    predicted_class = labels[predicted_label]
+    print(predicted_label)
+    return jsonify({'predicted_class': predicted_class})
 
 
 if __name__ == '__main__':
