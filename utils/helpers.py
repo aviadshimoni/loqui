@@ -60,7 +60,10 @@ def calculate_loss(mixup, alpha, video_model, video, label, border, is_border=Fa
             mixup_coef = np.random.beta(alpha, alpha)
             shuffled_indices = torch.randperm(video.size(0)).cuda(non_blocking=True)
             mixed_video = mixup_coef * video + (1 - mixup_coef) * video[shuffled_indices, :]
-            mix_border = mixup_coef * border + (1 - mixup_coef) * border[shuffled_indices, :]
+            if is_border:
+                mix_border = mixup_coef * border + (1 - mixup_coef) * border[shuffled_indices, :]
+            else:
+                mix_border = border
             mixed_label_a, mixed_label_b = label, label[shuffled_indices]
             predicted_label = get_prediction(video_model, mixed_video, mix_border, is_border=is_border)
             loss_bp = mixup_coef * loss_fn(predicted_label, mixed_label_a) + (1 - mixup_coef) * loss_fn(predicted_label,
