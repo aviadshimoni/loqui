@@ -23,7 +23,7 @@ def extract_opencv(filename):
     return video
 
 
-target_dir = '/tf/Daniel/pkls_test' # REPLACE ME
+target_dir = '/tf/Daniel/aviv_new_pkls' # REPLACE ME
 
 if not os.path.exists(target_dir):
     os.makedirs(target_dir)
@@ -32,7 +32,7 @@ if not os.path.exists(target_dir):
 class LRWDataset(Dataset):
     def __init__(self, mp4_path='lrw_mp4'):
         self.mp4_path = mp4_path
-        with open('label_sorted.txt') as myfile:
+        with open('label_sorted_30.txt') as myfile:
             self.labels = myfile.read().splitlines()
 
         self.data = []
