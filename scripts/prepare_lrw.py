@@ -23,7 +23,7 @@ def extract_opencv(filename):
     return video
 
 
-target_dir = '/tf/Daniel/pkls_test' # REPLACE ME
+target_dir = '/tf/Daniel/aviad_custom_pkls' # REPLACE ME
 
 if not os.path.exists(target_dir):
     os.makedirs(target_dir)
@@ -91,7 +91,7 @@ class LRWDataset(Dataset):
 
 
 if __name__ == '__main__':
-    loader = DataLoader(LRWDataset("/tf/Daniel/lipread_mp4"),
+    loader = DataLoader(LRWDataset("/tf/Daniel/converted_mp4s"),
                         batch_size=96,
                         num_workers=2,
                         shuffle=False,
