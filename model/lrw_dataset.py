@@ -68,7 +68,7 @@ class LRWDataset(LRWDatasetInterface):
             # Apply random scaling
             scaled_img = data_augmenter.random_scale(inputs, scale_range=[0.8, 1.2])
 
-            batch_img = data_augmenter.random_crop(inputs, (88, 88))
+            batch_img = data_augmenter.random_crop(scaled_img, (88, 88))
             batch_img = data_augmenter.horizontal_flip(batch_img)
         else:  # phase in ["val", "test"]
             batch_img = data_augmenter.center_crop(inputs, (88, 88))
