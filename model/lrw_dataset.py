@@ -66,7 +66,6 @@ class LRWDataset(LRWDatasetInterface):
 
         if self.phase == "train":
             batch_img =  data_augmenter.random_translation(inputs, range_x=(-10, 10), range_y=(-10, 10))
-            batch_img = data_augmenter.random_crop(batch_img, (88, 88))
             batch_img = data_augmenter.horizontal_flip(batch_img)
         else:  # phase in ["val", "test"]
             batch_img = data_augmenter.center_crop(inputs, (88, 88))
