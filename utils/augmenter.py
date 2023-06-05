@@ -1,7 +1,7 @@
 import random
 import numpy as np
 from spicy import ndimage
-
+import torch
 
 def center_crop(batch_img, size):
     w, h = batch_img.shape[2], batch_img.shape[1]
@@ -48,3 +48,17 @@ def horizontal_flip(batch_img):
         batch_img = np.ascontiguousarray(batch_img[:, :, ::-1])
 
     return batch_img
+
+
+def random_translation(batch_img, range_x, range_y):
+    batch_size, _, height, width = batch_img.shape
+    translated_batch = batch_img.clone()
+
+    for i in range(batch_size):
+        x_offset = random.randint(range_x[0], range_x[1])
+        y_offset = random.randint(range_y[0], range_y[1])
+        translated_batch[i] = torch.roll(batch_img[i], shifts=(y_offset, x_offset), dims=(1, 2))
+
+    return translated_batch
+
+

@@ -65,10 +65,8 @@ class LRWDataset(LRWDatasetInterface):
         label = int(tensor.get("label"))
 
         if self.phase == "train":
-            # Apply random scaling
-            scaled_img = data_augmenter.random_scale(inputs, scale_range=[0.8, 1.2])
-
-            batch_img = data_augmenter.random_crop(scaled_img, (88, 88))
+            batch_img =  data_augmenter.random_translation(inputs, range_x=(-10, 10), range_y=(-10, 10))
+            batch_img = data_augmenter.random_crop(batch_img, (88, 88))
             batch_img = data_augmenter.horizontal_flip(batch_img)
         else:  # phase in ["val", "test"]
             batch_img = data_augmenter.center_crop(inputs, (88, 88))
@@ -76,7 +74,6 @@ class LRWDataset(LRWDatasetInterface):
         result = {"video": torch.FloatTensor(batch_img[:, np.newaxis, ...]),
                   "label": label,
                   "duration": np.sum(duration).astype(float)}
-        # print(result["video"].size())
 
         return result
 
