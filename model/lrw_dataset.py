@@ -64,11 +64,12 @@ class LRWDataset(LRWDatasetInterface):
         duration = np.array(tensor.get("duration", np.zeros(29)))
         label = int(tensor.get("label"))
 
-        # TODO check what type inputs is and update the augmentation functions documentations
         if self.phase == "train":
+            # Apply random scaling
+            scaled_img = data_augmenter.random_scale(inputs, scale_range=[0.8, 1.2])
+
             batch_img = data_augmenter.random_crop(inputs, (88, 88))
             batch_img = data_augmenter.horizontal_flip(batch_img)
-            batch_img = data_augmenter.add_gaussian_noise(batch_img, mean=0.0, std=0.1)
         else:  # phase in ["val", "test"]
             batch_img = data_augmenter.center_crop(inputs, (88, 88))
 

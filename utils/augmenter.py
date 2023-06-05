@@ -1,5 +1,6 @@
 import random
 import numpy as np
+from spicy import ndimage
 
 
 def center_crop(batch_img, size):
@@ -34,6 +35,12 @@ def add_gaussian_noise(batch_img, mean, std):
     noisy_batch_img = np.clip(noisy_batch_img, 0.0, 1.0)  # Ensure values are within [0, 1] range
 
     return noisy_batch_img
+
+
+def random_scale(batch_img, scale_range):
+    scale_factor = random.uniform(scale_range[0], scale_range[1])
+    scaled_img = ndimage.zoom(batch_img, scale_factor, mode='nearest')
+    return scaled_img
 
 
 def horizontal_flip(batch_img):
