@@ -21,19 +21,19 @@ def random_crop(batch_img, size):
     return img
 
 
-def random_brightness(batch_img, brightness_range):
+def add_gaussian_noise(batch_img, mean, std):
     """
-    Adjust the brightness of the input frames randomly within the given range.
+    Add random Gaussian noise to the input batch of images.
     :param batch_img: Input batch of images (numpy array).
-    :param brightness_range: Tuple (min, max) specifying the range of brightness adjustment.
+    :param mean: Mean of the Gaussian distribution.
+    :param std: Standard deviation of the Gaussian distribution.
     :return: Augmented batch of images.
     """
-    min_brightness, max_brightness = brightness_range
-    brightness_factor = random.uniform(min_brightness, max_brightness)
-    batch_img = batch_img * brightness_factor
-    batch_img = np.clip(batch_img, 0.0, 1.0)  # Ensure values are within [0, 1] range
+    noise = np.random.normal(mean, std, size=batch_img.shape)
+    noisy_batch_img = batch_img + noise
+    noisy_batch_img = np.clip(noisy_batch_img, 0.0, 1.0)  # Ensure values are within [0, 1] range
 
-    return batch_img
+    return noisy_batch_img
 
 
 def horizontal_flip(batch_img):

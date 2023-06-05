@@ -68,7 +68,7 @@ class LRWDataset(LRWDatasetInterface):
         if self.phase == "train":
             batch_img = data_augmenter.random_crop(inputs, (88, 88))
             batch_img = data_augmenter.horizontal_flip(batch_img)
-            batch_img = data_augmenter.random_brightness(batch_img, brightness_range=(0.8, 1.2))
+            batch_img = data_augmenter.add_gaussian_noise(batch_img, mean=0.0, std=0.1)
         else:  # phase in ["val", "test"]
             batch_img = data_augmenter.center_crop(inputs, (88, 88))
 
