@@ -5,28 +5,11 @@ import glob
 import cv2
 import numpy as np
 from turbojpeg import TurboJPEG
+from utils.helpers import extract_opencv
 jpeg = TurboJPEG()
 
 
-def extract_opencv(filename):
-    video = []
-    cap = cv2.VideoCapture(filename)
-    while cap.isOpened():
-        ret, frame = cap.read()  # BGR
-        if ret:
-            frame = cv2.resize(frame, (256, 256))
-            frame = frame[115:211, 79:175]
-            _, jpeg_frame = cv2.imencode('.jpg', frame)
-            frame_bytes = jpeg_frame.tobytes()
-            video.append(frame_bytes)
-        else:
-            break
-
-    cap.release()
-    return video
-
-
-target_dir = '/tf/Daniel/aviad_custom_pkls' # REPLACE ME
+target_dir = '/tf/custom_pkls'
 
 if not os.path.exists(target_dir):
     os.makedirs(target_dir)
