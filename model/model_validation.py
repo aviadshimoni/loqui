@@ -4,6 +4,9 @@ import time
 from torch.cuda.amp import autocast
 from utils import helpers
 from model.lrw_dataset import LRWDataset
+from utils.helpers import get_logger
+
+logger = get_logger(__name__)
 
 @torch.no_grad()
 def validation(video_model, batch_size: int, num_workers: int = 1):
@@ -42,7 +45,7 @@ def validation(video_model, batch_size: int, num_workers: int = 1):
             msg = helpers.add_msg('', 'v_acc={:.5f}', np.array(validation_accuracy).mean())
             msg = helpers.add_msg(msg, 'eta={:.5f}', (end_time - start_time) * (len(loader) - i_iter) / 3600.0)
 
-            print(msg)
+            logger.info(msg)
 
     accuracy = float(np.array(validation_accuracy).mean())
     accuracy_msg = f'v_acc_{accuracy:.5f}_'
