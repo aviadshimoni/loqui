@@ -3,6 +3,8 @@ from torch.utils.data import DataLoader
 import numpy as np
 from torch.cuda.amp import autocast
 import torch
+import seaborn as sns
+from sklearn.metrics import confusion_matrix
 import matplotlib.pyplot as plt
 
 
@@ -94,6 +96,32 @@ def plot_train_metrics(train_losses: [], train_accuracies: [], epoch: int) -> No
 
         plt.tight_layout()
         plt.show()
+
+
+def show_confusion_matrix(true_labels, predicted_labels, class_labels):
+    """
+    Calculate and plot the confusion matrix.
+    :param true_labels: List of true labels.
+    :param predicted_labels: List of predicted labels.
+    :param class_labels: List of class labels.
+    """
+
+    # Calculate the confusion matrix
+    cm = confusion_matrix(true_labels, predicted_labels)
+
+    # Create a list of label indexes
+    label_indexes = np.arange(len(class_labels))
+
+    # Plotting the confusion matrix
+    plt.figure(figsize=(10, 8))
+    sns.heatmap(cm, annot=True, fmt="d", cmap="Blues",
+                xticklabels=class_labels, yticklabels=class_labels)
+    plt.xlabel("Predicted Labels")
+    plt.ylabel("True Labels")
+    plt.title("Confusion Matrix")
+    plt.xticks(label_indexes, class_labels, rotation=45, ha="right")
+    plt.yticks(label_indexes, class_labels)
+    plt.show()
 
 
 def add_msg(msg, k, v):
