@@ -6,3 +6,4 @@ lrw_mp4
 service_account_key.json
 lrw_roi_npy_gray_pkl_jpeg
 venv
+checkpoints
