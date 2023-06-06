@@ -6,6 +6,7 @@ import torch
 import seaborn as sns
 from sklearn.metrics import confusion_matrix
 import matplotlib.pyplot as plt
+import logging
 
 
 def parallel_model(model):
@@ -130,3 +131,8 @@ def add_msg(msg, k, v):
     msg += k.format(v)
 
     return msg
+
+def get_logger(name):
+    logging.basicConfig(level=logging.INFO, format='%(message)s')
+    logger = logging.getLogger(name)
+    return logger
