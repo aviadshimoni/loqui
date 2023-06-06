@@ -1,3 +1,5 @@
+import argparse
+
 import cv2
 import torch
 import numpy as np
@@ -28,4 +30,9 @@ def main():
 # Pass the path to the pickle file here
 pkl = "path/to/pickle/file.pkl"
 
-# main()
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--pickle_path', help="Path to pickle file to be displayed", default=None, required=True)
+    args = parser.parse_args()
+    pkl = vars(args).get("pickle_path")
+    main()
