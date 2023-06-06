@@ -89,7 +89,8 @@ def train(lr: float, batch_size: int, n_class: int, max_epoch: int, num_workers:
                 if not os.path.exists(temp):
                     os.makedirs(temp)
 
-                torch.save({'video_model': video_model.module.state_dict()}, saved_file)
+                if acc > best_acc:
+                    torch.save({'video_model': video_model.module.state_dict()}, saved_file)
 
                 if tot_iter != 0:
                     best_acc = max(acc, best_acc)
