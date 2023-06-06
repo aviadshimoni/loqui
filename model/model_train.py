@@ -7,13 +7,14 @@ from utils import helpers
 from model import VideoModel
 from torch.cuda.amp import GradScaler
 from model.lrw_dataset import LRWDataset
-import warnings
+from utils.helpers import get_logger
 
 torch.backends.cudnn.benchmark = True
 
+logger = get_logger(__name__)
 
 def train(lr: float, batch_size: int, n_class: int, max_epoch: int, num_workers: int = 1, gpus: str = '0',
-          weights=None, save_prefix: str = '', mixup: bool = False) -> None:
+          weights=None, save_prefix: str = '', mixup: bool = False, se: bool = False) -> None:
     """
     Handle the model training
     :param lr: TODO
@@ -25,25 +26,26 @@ def train(lr: float, batch_size: int, n_class: int, max_epoch: int, num_workers:
     :param weights: TODO
     :param save_prefix: TODO
     :param mixup: TODO
+    :param se: TODO
     :return: None
     """
 
     os.environ['CUDA_VISIBLE_DEVICES'] = gpus
 
-    video_model = VideoModel(n_class).cuda()
+    video_model = VideoModel(n_class, se=se).cuda()
 
     lr = batch_size / 32.0 / torch.cuda.device_count() * lr
     optim_video = optim.Adam(video_model.parameters(), lr=lr, weight_decay=1e-4)
     scheduler = optim.lr_scheduler.CosineAnnealingLR(optim_video, T_max=max_epoch, eta_min=5e-6)
 
     if weights is not None:
-        print('load weights')
+        logger.info('load weights')
         weight = torch.load(weights, map_location=torch.device('cpu'))
         helpers.load_missing(video_model, weight.get('video_model'))
 
     video_model = helpers.parallel_model(video_model)
     dataset = LRWDataset("train", dataset_prefix="/tf/Daniel")
-    print(f"Dataset object of training set: {dataset}, len is: {len(dataset)}")
+    logger.info(f"Dataset object of training set: {dataset}, len is: {len(dataset)}")
 
     loader = helpers.dataset2dataloader(dataset, batch_size, num_workers)
 
@@ -77,7 +79,7 @@ def train(lr: float, batch_size: int, n_class: int, max_epoch: int, num_workers:
             for k, v in loss.items():
                 msg += f',{k}={v:.5f}'
             msg += f",lr={helpers.show_lr(optim_video)},best_acc={best_acc:2f}"
-            print(msg)
+            logger.info(msg)
 
             if i_iteration == len(loader) - 1 or (epoch == 0 and i_iteration == 0):
                 acc, msg = validation(video_model, batch_size)
@@ -100,7 +102,7 @@ def train(lr: float, batch_size: int, n_class: int, max_epoch: int, num_workers:
         loss = train_loss / len(loader)
         train_losses.append(loss)
 
-        print('plot train metrics:')
+        logger.info('plot train metrics:')
         helpers.plot_train_metrics(train_losses, train_accs, epoch)
 
         scheduler.step()

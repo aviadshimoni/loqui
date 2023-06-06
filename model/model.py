@@ -28,8 +28,9 @@ class VideoModel(nn.Module, metaclass=Singleton):
     and outputs a tensor of shape (batch_size, n_class) containing the logits for each video in the batch.
     """
 
-    def __init__(self, num_classes: int, dropout: float = 0.5, training: bool = False) -> None:
+    def __init__(self, num_classes: int, dropout: float = 0.5, se: bool = False) -> None:
         super(VideoModel, self).__init__()
+        self.se = se
 
         self.num_classes = num_classes
         self.video_cnn = VideoCNN()
