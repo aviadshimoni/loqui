@@ -16,7 +16,7 @@ class LRWDataset(LRWDatasetInterface):
     and being used when training or testing the model
     """
 
-    def __init__(self, phase, dataset_prefix: str = join(dirname(dirname(realpath(__file__))), "dataset"),
+    def __init__(self, phase, dataset_prefix: str,
                  labels_path: str = "/tf/loqui/label_sorted_5.txt") -> None:
         self.phase = phase  # train/val/test
         self.dataset_prefix = dataset_prefix
