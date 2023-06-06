@@ -1,4 +1,5 @@
 import torch
+import torch.nn.functional as F
 from utils.helpers import load_missing, extract_opencv
 from flask import Flask, request, jsonify
 from model.model import VideoModel
@@ -20,7 +21,7 @@ video_model.eval()
 
 
 def preprocess_frames(frames):
-    input_shape = (1, 1, 1, 88, 88)  # Adjust the dimensions according to the model's requirements
+    input_shape = (1, 1, 88, 88)  # Adjust the dimensions according to the model's requirements
     tensor_frames = []
 
     for frame in frames:
@@ -57,6 +58,22 @@ def preprocess_frames(frames):
     return tensor_frames
 
 
+def get_top_10_tuples(predictions_to_probabilities):
+    sorted_tuples = sorted(predictions_to_probabilities, key=lambda x: x[1], reverse=True)
+    top = sorted_tuples[:10]
+    return top
+
+
+def map_labels(tuples_list):
+    tuples = []
+    for tup in tuples_list:
+        index = tup[0]
+        value = tup[1]
+        label = labels[index]
+        tuples.append((label, value))
+
+    return tuples
+
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -74,13 +91,15 @@ def predict():
     # Pass the frames through the model
     with torch.no_grad():
         predictions = video_model(frames)
-        predicted_label = torch.argmax(predictions)
-        predicted_label = predicted_label.item()
 
-    predicted_class = labels[predicted_label]
-    print(predicted_label)
-    return jsonify({'predicted_class': predicted_class})
+    probabilities = F.softmax(predictions, dim=1)
+
+    class_percentages = [(idx, p.item() * 100) for idx, p in enumerate(probabilities[0])]
+    top_10 = get_top_10_tuples(class_percentages)
+    top_10_labels = map_labels(top_10)
+
+    return jsonify({'predicted_class': top_10_labels})
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=8080)
