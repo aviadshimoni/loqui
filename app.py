@@ -9,16 +9,6 @@ import cv2
 
 app = Flask(__name__)
 
-labels = []
-with open('label_sorted_full.txt') as myfile:
-    labels = myfile.read().splitlines()
-
-video_model = VideoModel(500)
-weights_file = "weights/lrw-cosine-lr-acc-0.85080.pt"
-weight = torch.load(weights_file, map_location=torch.device('cpu'))
-load_missing(video_model, weight.get('video_model'))
-video_model.eval()
-
 
 def preprocess_frames(frames):
     input_shape = (1, 1, 88, 88)  # Adjust the dimensions according to the model's requirements
@@ -64,7 +54,7 @@ def get_top_10_tuples(predictions_to_probabilities):
     return top
 
 
-def map_labels(tuples_list):
+def map_labels(tuples_list, labels):
     tuples = []
     for tup in tuples_list:
         index = tup[0]
@@ -75,8 +65,36 @@ def map_labels(tuples_list):
     return tuples
 
 
-@app.route('/predict', methods=['POST'])
-def predict():
+def load_model(model_type):
+    if model_type == "lrw":
+        with open('label_sorted_full.txt') as myfile:
+            labels = myfile.read().splitlines()
+
+        video_model = VideoModel(500)
+        weights_file = "weights/lrw-cosine-lr-acc-0.85080.pt"
+        weight = torch.load(weights_file, map_location=torch.device('cpu'))
+
+    elif model_type == "unseen":
+        with open('label_sorted_5.txt') as myfile:
+            labels = myfile.read().splitlines()
+
+        video_model = VideoModel(5)
+        weights_file = "weights/best-custom-weight-0.97.pt"
+        weight = torch.load(weights_file, map_location=torch.device('cpu'))
+
+    else:
+        raise ValueError("WTF")
+
+    load_missing(video_model, weight.get('video_model'))
+    video_model.eval()
+
+    return video_model, labels
+
+
+@app.route('/predict/<model_type>', methods=['POST'])
+def predict(model_type):
+    video_model, labels = load_model(model_type)
+
     file = request.files['file']
 
     with tempfile.NamedTemporaryFile(suffix='.mp4') as tmp_file:
@@ -96,7 +114,7 @@ def predict():
 
     class_percentages = [(idx, p.item() * 100) for idx, p in enumerate(probabilities[0])]
     top_10 = get_top_10_tuples(class_percentages)
-    top_10_labels = map_labels(top_10)
+    top_10_labels = map_labels(top_10, labels)
 
     return jsonify({'predicted_class': top_10_labels})
 
