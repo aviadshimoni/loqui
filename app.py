@@ -1,5 +1,7 @@
 import torch
 import torch.nn.functional as F
+
+from scripts.mp4_converter import convert_mp4_files, convert_mp4_file
 from utils.helpers import load_missing, extract_opencv
 from flask import Flask, request, jsonify
 from model.model import VideoModel
@@ -99,6 +101,8 @@ def predict(model_type):
 
     with tempfile.NamedTemporaryFile(suffix='.mp4') as tmp_file:
         file.save(tmp_file.name)
+
+        convert_mp4_file(tmp_file.name)
 
         # Extract frames using OpenCV from the temporary file
         raw_frames = extract_opencv(tmp_file.name)
