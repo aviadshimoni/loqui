@@ -6,7 +6,8 @@ import numpy as np
 from torch.cuda.amp import autocast
 import torch
 import matplotlib.pyplot as plt
-
+import cv2
+from turbojpeg import TurboJPEG
 
 def parallel_model(model):
     return nn.DataParallel(model)
@@ -127,3 +128,19 @@ def get_logger(name):
     logging.basicConfig(level=logging.INFO, format='%(message)s')
     logger = logging.getLogger(name)
     return logger
+
+
+def extract_opencv(filename):
+    jpeg = TurboJPEG()
+    video = []
+    cap = cv2.VideoCapture(filename)
+    while cap.isOpened():
+        ret, frame = cap.read()  # BGR
+        if ret:
+            frame = frame[115:211, 79:175]
+            frame = jpeg.encode(frame)
+            video.append(frame)
+        else:
+            break
+    cap.release()
+    return video
