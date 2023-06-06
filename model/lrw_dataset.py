@@ -17,11 +17,12 @@ class LRWDataset(LRWDatasetInterface):
     """
 
     def __init__(self, phase, dataset_prefix: str,
-                 labels_path: str = "label_sorted.txt") -> None:
+                 labels_path: str = "/tf/loqui/label_sorted_5.txt") -> None:
         self.phase = phase  # train/val/test
         self.dataset_prefix = dataset_prefix
         self.labels_path = labels_path
         self.labels = self.set_labels()
+        print(self.labels)
         self.list = self.append_files()
 
     def set_labels(self) -> list:
@@ -42,7 +43,7 @@ class LRWDataset(LRWDatasetInterface):
         lst = []
 
         for i, label in enumerate(self.labels):
-            files = glob.glob(join(self.dataset_prefix, "/tf/Daniel/aviad_custom_pkls", label, self.phase, "*.pkl"))
+            files = glob.glob(join(self.dataset_prefix, "aviad_custom_pkls", label, self.phase, "*.pkl"))
             files = sorted(files)
 
             lst += [file for file in files]
@@ -61,8 +62,6 @@ class LRWDataset(LRWDatasetInterface):
         inputs = [sg.jpeg.decode(img, pixel_format=TJPF_GRAY) for img in inputs]
         inputs = np.stack(inputs, 0) / 255.0
         inputs = inputs[:, :, :, 0]
-        duration = np.array(tensor.get("duration", np.zeros(29)))
-        label = int(tensor.get("label"))
 
         # TODO check what type inputs is and update the augmentation functions documentations
         if self.phase == "train":
@@ -72,8 +71,7 @@ class LRWDataset(LRWDatasetInterface):
             batch_img = data_augmenter.center_crop(inputs, (88, 88))
 
         result = {"video": torch.FloatTensor(batch_img[:, np.newaxis, ...]),
-                  "label": label,
-                  "duration": np.sum(duration).astype(float)}
+                  "label": tensor.get("label")}
         # print(result["video"].size())
 
         return result
@@ -83,5 +81,7 @@ class LRWDataset(LRWDatasetInterface):
         implements the len operator
         :return: len of self.list
         """
-
         return len(self.list)
+
+    def get_labels(self):
+        return self.labels

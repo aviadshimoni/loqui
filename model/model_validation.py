@@ -9,33 +9,36 @@ from utils.helpers import get_logger
 logger = get_logger(__name__)
 
 @torch.no_grad()
-def validation(video_model, batch_size: int, num_workers: int = 1, is_border: bool = False):
+def validation(video_model, batch_size: int, num_workers: int = 1):
     """
     Evaluate the model by validation set
     :param video_model: TODO
     :param batch_size: TODO
     :param num_workers: TODO
-    :param is_border: TODO
     :return:
     """
 
-    dataset = LRWDataset("val", dataset_prefix="/tf/loqui")
-    logger.info(f"Dataset object of Validation set: {dataset}, len is: {len(dataset)}")
+    dataset = LRWDataset("val", dataset_prefix="/tf/Daniel")
+    print(f"Dataset object of Validation set: {dataset}, len is: {len(dataset)}")
     loader = helpers.dataset2dataloader(dataset, batch_size, num_workers, shuffle=False)
 
-    logger.info('start testing validation set')
+    print('start testing validation set')
+    predicted_labels = []
+    true_labels = []
     validation_accuracy = []
 
     for i_iter, sample in enumerate(loader):
         video_model.eval()
 
         start_time = time.time()
-        video, label, border = helpers.prepare_data(sample)
+        video, label = helpers.prepare_data(sample)
 
         with autocast():
-            predicted_label = helpers.get_prediction(video_model, video, border, is_border=is_border)
+            y_v = video_model(video)
 
-        validation_accuracy.extend((predicted_label.argmax(-1) == label).cpu().numpy().tolist())
+        validation_accuracy.extend((y_v.argmax(-1) == label).cpu().numpy().tolist())
+        predicted_labels.extend(y_v.argmax(-1).cpu().numpy().tolist())
+        true_labels.extend(label.cpu().numpy().tolist())
         end_time = time.time()
 
         if i_iter % 10 == 0:
@@ -46,5 +49,6 @@ def validation(video_model, batch_size: int, num_workers: int = 1, is_border: bo
 
     accuracy = float(np.array(validation_accuracy).mean())
     accuracy_msg = f'v_acc_{accuracy:.5f}_'
+    helpers.show_confusion_matrix(true_labels, predicted_labels, dataset.get_labels())
 
     return accuracy, accuracy_msg

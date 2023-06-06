@@ -9,13 +9,12 @@ from torch.cuda.amp import GradScaler
 from model.lrw_dataset import LRWDataset
 from utils.helpers import get_logger
 
-logger = get_logger(__name__)
-
 torch.backends.cudnn.benchmark = True
 
+logger = get_logger(__name__)
 
 def train(lr: float, batch_size: int, n_class: int, max_epoch: int, num_workers: int = 1, gpus: str = '0',
-          weights=None, save_prefix: str = '', mixup: bool = False, is_border: bool = False, se: bool = False) -> None:
+          weights=None, save_prefix: str = '', mixup: bool = False, se: bool = False) -> None:
     """
     Handle the model training
     :param lr: TODO
@@ -27,14 +26,13 @@ def train(lr: float, batch_size: int, n_class: int, max_epoch: int, num_workers:
     :param weights: TODO
     :param save_prefix: TODO
     :param mixup: TODO
-    :param is_border: TODO
     :param se: TODO
     :return: None
     """
 
     os.environ['CUDA_VISIBLE_DEVICES'] = gpus
 
-    video_model = VideoModel(n_class, is_border=is_border, se=se).cuda()
+    video_model = VideoModel(n_class, se=se).cuda()
 
     lr = batch_size / 32.0 / torch.cuda.device_count() * lr
     optim_video = optim.Adam(video_model.parameters(), lr=lr, weight_decay=1e-4)
@@ -46,7 +44,7 @@ def train(lr: float, batch_size: int, n_class: int, max_epoch: int, num_workers:
         helpers.load_missing(video_model, weight.get('video_model'))
 
     video_model = helpers.parallel_model(video_model)
-    dataset = LRWDataset("train", dataset_prefix="")
+    dataset = LRWDataset("train", dataset_prefix="/tf/Daniel")
     logger.info(f"Dataset object of training set: {dataset}, len is: {len(dataset)}")
 
     loader = helpers.dataset2dataloader(dataset, batch_size, num_workers)
@@ -63,10 +61,11 @@ def train(lr: float, batch_size: int, n_class: int, max_epoch: int, num_workers:
 
         for i_iteration, sample in enumerate(loader):
             start_time = time.time()
-            video_model.train()
-            video, label, border = helpers.prepare_data(sample)
 
-            loss = helpers.calculate_loss(mixup, alpha, video_model, video, label, border, is_border=is_border)
+            video_model.train()
+            video, label = helpers.prepare_data(sample)
+
+            loss = helpers.calculate_loss(mixup, alpha, video_model, video, label)
             optim_video.zero_grad()
             scaler.scale(loss['CE V']).backward()
             scaler.step(optim_video)
@@ -83,16 +82,16 @@ def train(lr: float, batch_size: int, n_class: int, max_epoch: int, num_workers:
             logger.info(msg)
 
             if i_iteration == len(loader) - 1 or (epoch == 0 and i_iteration == 0):
-                acc, msg = validation(video_model, batch_size, is_border=is_border)
+                acc, msg = validation(video_model, batch_size)
                 train_accs.append(acc)
 
+                saved_file = f'{save_prefix}_iter_{tot_iter}_epoch_{epoch}_{msg}.pt'
+
+                temp = os.path.split(saved_file)[0]
+                if not os.path.exists(temp):
+                    os.makedirs(temp)
+
                 if acc > best_acc:
-                    saved_file = f'{save_prefix}_iter_{tot_iter}_epoch_{epoch}_{msg}.pt'
-
-                    temp = os.path.split(saved_file)[0]
-                    if not os.path.exists(temp):
-                        os.makedirs(temp)
-
                     torch.save({'video_model': video_model.module.state_dict()}, saved_file)
 
                 if tot_iter != 0:

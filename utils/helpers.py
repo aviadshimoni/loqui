@@ -1,13 +1,14 @@
-import logging
-
 import torch.nn as nn
 from torch.utils.data import DataLoader
 import numpy as np
 from torch.cuda.amp import autocast
 import torch
+import seaborn as sns
+from sklearn.metrics import confusion_matrix
 import matplotlib.pyplot as plt
 import cv2
 from turbojpeg import TurboJPEG
+import logging
 
 def parallel_model(model):
     return nn.DataParallel(model)
@@ -15,6 +16,7 @@ def parallel_model(model):
 
 def load_missing(model, pretrained_dict):
     model_dict = model.state_dict()
+
     pretrained_dict = {k: v for k, v in pretrained_dict.items() if
                        k in model_dict.keys() and v.size() == model_dict[k].size()}
     missed_params = [k for k, v in model_dict.items() if not k in pretrained_dict.keys()]
@@ -41,33 +43,20 @@ def dataset2dataloader(dataset, batch_size, num_workers, shuffle=True):
     return loader
 
 
-def get_prediction(video_model, video, border, is_border=False):
-    """
-    gets a model, a video and border. run the model over the given video and return the prediction.
-    uses the border if is_border is true
-    """
-
-    if is_border:
-        return video_model(video, border)
-    return video_model(video)
-
-
-def calculate_loss(mixup, alpha, video_model, video, label, border, is_border=False):
+def calculate_loss(mixup, alpha, video_model, video, label):
     loss = {}
     loss_fn = nn.CrossEntropyLoss()
-
     with autocast():
         if mixup:
             mixup_coef = np.random.beta(alpha, alpha)
             shuffled_indices = torch.randperm(video.size(0)).cuda(non_blocking=True)
             mixed_video = mixup_coef * video + (1 - mixup_coef) * video[shuffled_indices, :]
-            mix_border = mixup_coef * border + (1 - mixup_coef) * border[shuffled_indices, :] if is_border else border
             mixed_label_a, mixed_label_b = label, label[shuffled_indices]
-            predicted_label = get_prediction(video_model, mixed_video, mix_border, is_border=is_border)
+            predicted_label = video_model(mixed_video)
             loss_bp = mixup_coef * loss_fn(predicted_label, mixed_label_a) + (1 - mixup_coef) * loss_fn(predicted_label,
                                                                                                         mixed_label_b)
         else:
-            predicted_label = get_prediction(video_model, video, border, is_border=is_border)
+            predicted_label = video_model(video)
             loss_bp = loss_fn(predicted_label, label)
     loss['CE V'] = loss_bp
 
@@ -75,15 +64,10 @@ def calculate_loss(mixup, alpha, video_model, video, label, border, is_border=Fa
 
 
 def prepare_data(sample: {}):
-    """
-    extract the relevant data from a given sample
-    """
-
     video = sample['video'].cuda(non_blocking=True)
     label = sample['label'].cuda(non_blocking=True).long()
-    border = sample['duration'].cuda(non_blocking=True).float()
 
-    return video, label, border
+    return video, label
 
 
 def plot_train_metrics(train_losses: [], train_accuracies: [], epoch: int) -> None:
@@ -116,13 +100,38 @@ def plot_train_metrics(train_losses: [], train_accuracies: [], epoch: int) -> No
         plt.show()
 
 
+def show_confusion_matrix(true_labels, predicted_labels, class_labels):
+    """
+    Calculate and plot the confusion matrix.
+    :param true_labels: List of true labels.
+    :param predicted_labels: List of predicted labels.
+    :param class_labels: List of class labels.
+    """
+
+    # Calculate the confusion matrix
+    cm = confusion_matrix(true_labels, predicted_labels)
+
+    # Create a list of label indexes
+    label_indexes = np.arange(len(class_labels))
+
+    # Plotting the confusion matrix
+    plt.figure(figsize=(10, 8))
+    sns.heatmap(cm, annot=True, fmt="d", cmap="Blues",
+                xticklabels=class_labels, yticklabels=class_labels)
+    plt.xlabel("Predicted Labels")
+    plt.ylabel("True Labels")
+    plt.title("Confusion Matrix")
+    plt.xticks(label_indexes, class_labels, rotation=45, ha="right")
+    plt.yticks(label_indexes, class_labels)
+    plt.show()
+
+
 def add_msg(msg, k, v):
     if msg:
         msg += ','
     msg += k.format(v)
 
     return msg
-
 
 def get_logger(name):
     logging.basicConfig(level=logging.INFO, format='%(message)s')

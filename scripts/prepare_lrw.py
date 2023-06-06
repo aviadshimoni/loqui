@@ -9,16 +9,16 @@ from utils.helpers import extract_opencv
 jpeg = TurboJPEG()
 
 
-target_dir = '/tf/Daniel/pkls_test' # REPLACE ME
+target_dir = '/tf/custom_pkls'
 
 if not os.path.exists(target_dir):
     os.makedirs(target_dir)
 
 
 class LRWDataset(Dataset):
-    def __init__(self, mp4_path='lrw_mp4'):
+    def __init__(self, mp4_path='/tf/Daniel/converted_mp4s'):
         self.mp4_path = mp4_path
-        with open('label_sorted.txt') as myfile:
+        with open('/tf/loqui/label_sorted_5.txt') as myfile:
             self.labels = myfile.read().splitlines()
 
         self.data = []
@@ -47,6 +47,7 @@ class LRWDataset(Dataset):
         else:
             duration = np.array([0.0] * 3 + [1.0] * 23 + [0.0] * 3)  # Update duration values
 
+        print(label)
         result = {
             'video': inputs,
             'label': int(label),
@@ -77,7 +78,7 @@ class LRWDataset(Dataset):
 
 
 if __name__ == '__main__':
-    loader = DataLoader(LRWDataset("/tf/Daniel/lipread_mp4"),
+    loader = DataLoader(LRWDataset("/tf/Daniel/converted_mp4s"),
                         batch_size=96,
                         num_workers=2,
                         shuffle=False,
