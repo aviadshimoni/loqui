@@ -1,7 +1,9 @@
 import torch
 import torch.nn.functional as F
+from matplotlib import pyplot as plt
 
 from scripts.mp4_converter import convert_mp4_files, convert_mp4_file
+from utils.face_detector import get_faces, anno_img
 from utils.helpers import load_missing, extract_opencv
 from flask import Flask, request, jsonify
 from model.model import VideoModel
@@ -9,14 +11,38 @@ import numpy as np
 import tempfile
 import cv2
 
+# To be able to run face_alignment
+import ssl
+
+ssl._create_default_https_context = ssl._create_unverified_context
+
 app = Flask(__name__)
 
 
-def preprocess_frames(frames):
+# Currently doesn't support plotting the frames after preprocessing due to dimension incompatibility.
+def plot_frames(frames_to_plot):
+    normalized_frames_to_plot = frames_to_plot.clone()
+    if len(frames_to_plot.shape) == 5:
+        normalized_frames_to_plot = normalized_frames_to_plot[0]
+
+    num_frames = normalized_frames_to_plot.shape[0]
+
+    for i in range(num_frames):
+        frame = normalized_frames_to_plot[i]  # Extract the frame
+        if frame.ndim == 3:  # If the frame is 3D, reshape it to 2D
+            frame = frame.squeeze()
+        if frame.ndim == 4:
+            frame = frame.squeeze().squeeze()
+        plt.imshow(frame, cmap='gray')
+        plt.axis('off')
+        plt.show()
+
+
+def preprocess_frames(frames_bytes):
     input_shape = (1, 1, 88, 88)  # Adjust the dimensions according to the model's requirements
     tensor_frames = []
 
-    for frame in frames:
+    for frame in frames_bytes:
         if isinstance(frame, bytes):
             # Handle frames received as bytes (assuming encoded frames)
             nparr = np.frombuffer(frame, np.uint8)
@@ -100,15 +126,19 @@ def predict(model_type):
     file = request.files['file']
 
     with tempfile.NamedTemporaryFile(suffix='.mp4') as tmp_file:
-        file.save(tmp_file.name)
+        with tempfile.NamedTemporaryFile(suffix='.mp4') as tmp_file_out:
+            file.save(tmp_file.name)
 
-        convert_mp4_file(tmp_file.name)
+            convert_mp4_file(tmp_file.name, tmp_file_out.name)
 
-        # Extract frames using OpenCV from the temporary file
-        raw_frames = extract_opencv(tmp_file.name)
+            # Extract frames using OpenCV from the temporary file
+            raw_frames = extract_opencv(tmp_file_out.name)
+
+    faces_landmark = get_faces(raw_frames)
+    frames = anno_img(raw_frames, faces_landmark)
 
     # Preprocess the frames
-    frames = preprocess_frames(raw_frames)
+    frames = preprocess_frames(frames)
 
     # Pass the frames through the model
     with torch.no_grad():

@@ -140,16 +140,17 @@ def get_logger(name):
 
 
 def extract_opencv(filename):
-    jpeg = TurboJPEG()
     video = []
     cap = cv2.VideoCapture(filename)
+    length = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    print("frames:", length)
+
     while cap.isOpened():
         ret, frame = cap.read()  # BGR
         if ret:
-            frame = frame[115:211, 79:175]
-            frame = jpeg.encode(frame)
             video.append(frame)
         else:
             break
     cap.release()
+
     return video

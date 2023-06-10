@@ -64,7 +64,7 @@ def convert_mp4_files(source_dir, target_dir):
         shutil.rmtree(frame_dir)
 
 
-def convert_mp4_file(file_path):
+def convert_mp4_file(file_path, file_path_out):
     # Open the video file
     video = cv2.VideoCapture(file_path)
 
@@ -96,7 +96,7 @@ def convert_mp4_file(file_path):
     video.release()
 
     # Write the resized frames to the input file
-    out = cv2.VideoWriter(file_path, cv2.VideoWriter_fourcc(*"mp4v"), fps, (256, 256))
+    out = cv2.VideoWriter(file_path_out, cv2.VideoWriter_fourcc(*"mp4v"), fps, (256, 256))
     for frame in frames:
         out.write(frame)
     out.release()
