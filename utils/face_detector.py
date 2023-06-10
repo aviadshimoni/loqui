@@ -16,7 +16,6 @@ def plot_frames(frames_to_plot):
 
 def get_faces(frames):
     fa = face_alignment.FaceAlignment(face_alignment.LandmarksType._2halfD, device='cpu', face_detector='sfd')
-    plot_frames(frames)
     all_landmarks = []
     for frame in frames:
         points_list = fa.get_landmarks(frame)

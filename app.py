@@ -10,6 +10,7 @@ from model.model import VideoModel
 import numpy as np
 import tempfile
 import cv2
+import json
 
 # To be able to run face_alignment
 import ssl
@@ -150,7 +151,8 @@ def predict(model_type):
     top_10 = get_top_10_tuples(class_percentages)
     top_10_labels = map_labels(top_10, labels)
 
-    return jsonify({'predicted_class': top_10_labels})
+    json_data = json.dumps([{label: value} for label, value in top_10_labels])
+    return json_data
 
 
 if __name__ == '__main__':
