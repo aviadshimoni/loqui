@@ -5,5 +5,5 @@ PyTurboJPEG
 matplotlib~=3.7.1
 scikit-learn==1.2.2
 seaborn==0.12.2
-face-alignment==1.3.5
+face-alignment==1.3.3
 Flask~=2.3.2
