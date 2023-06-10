@@ -1,29 +1,49 @@
 import torch
+import torch.nn.functional as F
+from matplotlib import pyplot as plt
+
+from scripts.mp4_converter import convert_mp4_files, convert_mp4_file
+from utils.face_detector import get_faces, anno_img
 from utils.helpers import load_missing, extract_opencv
 from flask import Flask, request, jsonify
 from model.model import VideoModel
 import numpy as np
 import tempfile
 import cv2
+import json
+
+# To be able to run face_alignment
+import ssl
+
+ssl._create_default_https_context = ssl._create_unverified_context
 
 app = Flask(__name__)
 
-labels = []
-with open('label_sorted_full.txt') as myfile:
-    labels = myfile.read().splitlines()
 
-video_model = VideoModel(500)
-weights_file = "weights/lrw-cosine-lr-acc-0.85080.pt"
-weight = torch.load(weights_file, map_location=torch.device('cpu'))
-load_missing(video_model, weight.get('video_model'))
-video_model.eval()
+# Currently doesn't support plotting the frames after preprocessing due to dimension incompatibility.
+def plot_frames(frames_to_plot):
+    normalized_frames_to_plot = frames_to_plot.clone()
+    if len(frames_to_plot.shape) == 5:
+        normalized_frames_to_plot = normalized_frames_to_plot[0]
+
+    num_frames = normalized_frames_to_plot.shape[0]
+
+    for i in range(num_frames):
+        frame = normalized_frames_to_plot[i]  # Extract the frame
+        if frame.ndim == 3:  # If the frame is 3D, reshape it to 2D
+            frame = frame.squeeze()
+        if frame.ndim == 4:
+            frame = frame.squeeze().squeeze()
+        plt.imshow(frame, cmap='gray')
+        plt.axis('off')
+        plt.show()
 
 
-def preprocess_frames(frames):
-    input_shape = (1, 1, 1, 88, 88)  # Adjust the dimensions according to the model's requirements
+def preprocess_frames(frames_bytes):
+    input_shape = (1, 1, 88, 88)  # Adjust the dimensions according to the model's requirements
     tensor_frames = []
 
-    for frame in frames:
+    for frame in frames_bytes:
         if isinstance(frame, bytes):
             # Handle frames received as bytes (assuming encoded frames)
             nparr = np.frombuffer(frame, np.uint8)
@@ -57,30 +77,83 @@ def preprocess_frames(frames):
     return tensor_frames
 
 
+def get_top_10_tuples(predictions_to_probabilities):
+    sorted_tuples = sorted(predictions_to_probabilities, key=lambda x: x[1], reverse=True)
+    top = sorted_tuples[:10]
+    return top
 
-@app.route('/predict', methods=['POST'])
-def predict():
+
+def map_labels(tuples_list, labels):
+    tuples = []
+    for tup in tuples_list:
+        index = tup[0]
+        value = tup[1]
+        label = labels[index]
+        tuples.append((label, value))
+
+    return tuples
+
+
+def load_model(model_type):
+    if model_type == "lrw":
+        with open('label_sorted_full.txt') as myfile:
+            labels = myfile.read().splitlines()
+
+        video_model = VideoModel(500)
+        weights_file = "weights/lrw-cosine-lr-acc-0.85080.pt"
+        weight = torch.load(weights_file, map_location=torch.device('cpu'))
+
+    elif model_type == "unseen":
+        with open('label_sorted_5.txt') as myfile:
+            labels = myfile.read().splitlines()
+
+        video_model = VideoModel(5)
+        weights_file = "weights/best-custom-weight-0.97.pt"
+        weight = torch.load(weights_file, map_location=torch.device('cpu'))
+
+    else:
+        raise ValueError("WTF")
+
+    load_missing(video_model, weight.get('video_model'))
+    video_model.eval()
+
+    return video_model, labels
+
+
+@app.route('/predict/<model_type>', methods=['POST'])
+def predict(model_type):
+    video_model, labels = load_model(model_type)
+
     file = request.files['file']
 
     with tempfile.NamedTemporaryFile(suffix='.mp4') as tmp_file:
-        file.save(tmp_file.name)
+        with tempfile.NamedTemporaryFile(suffix='.mp4') as tmp_file_out:
+            file.save(tmp_file.name)
 
-        # Extract frames using OpenCV from the temporary file
-        raw_frames = extract_opencv(tmp_file.name)
+            convert_mp4_file(tmp_file.name, tmp_file_out.name)
+
+            # Extract frames using OpenCV from the temporary file
+            raw_frames = extract_opencv(tmp_file_out.name)
+
+    faces_landmark = get_faces(raw_frames)
+    frames = anno_img(raw_frames, faces_landmark)
 
     # Preprocess the frames
-    frames = preprocess_frames(raw_frames)
+    frames = preprocess_frames(frames)
 
     # Pass the frames through the model
     with torch.no_grad():
         predictions = video_model(frames)
-        predicted_label = torch.argmax(predictions)
-        predicted_label = predicted_label.item()
 
-    predicted_class = labels[predicted_label]
-    print(predicted_label)
-    return jsonify({'predicted_class': predicted_class})
+    probabilities = F.softmax(predictions, dim=1)
+
+    class_percentages = [(idx, p.item() * 100) for idx, p in enumerate(probabilities[0])]
+    top_10 = get_top_10_tuples(class_percentages)
+    top_10_labels = map_labels(top_10, labels)
+
+    json_data = json.dumps([{label: value} for label, value in top_10_labels])
+    return json_data
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=8080)
