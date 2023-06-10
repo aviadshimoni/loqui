@@ -6,6 +6,7 @@ from scripts.mp4_converter import convert_mp4_files, convert_mp4_file
 from utils.face_detector import get_faces, anno_img
 from utils.helpers import load_missing, extract_opencv
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from model.model import VideoModel
 import numpy as np
 import tempfile
@@ -18,7 +19,7 @@ import ssl
 ssl._create_default_https_context = ssl._create_unverified_context
 
 app = Flask(__name__)
-
+CORS(app, origins='*', allow_headers=['*'])
 
 # Currently doesn't support plotting the frames after preprocessing due to dimension incompatibility.
 def plot_frames(frames_to_plot):
