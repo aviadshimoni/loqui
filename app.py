@@ -152,7 +152,7 @@ def predict(model_type):
     top_10 = get_top_10_tuples(class_percentages)
     top_10_labels = map_labels(top_10, labels)
 
-    json_data = json.dumps([{label: value} for label, value in top_10_labels])
+    json_data = json.dumps([[label, value] for label, value in top_10_labels])
     return json_data
 
 
