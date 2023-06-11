@@ -9,6 +9,10 @@ Our model excels at decoding spoken words, making it an invaluable asset for a w
 
 Join us on this journey as we unlock the potential of lips reading technology and bring words to life
 
+![loqui-architecture](doc/readme/loqui-architecture.png)
+
+To better understand the architecture of our model, take a look at the image above. It provides an overview of the components and how they work together to enable accurate lips reading.
+
 # Dataset
 The LRW Dataset is a comprehensive and meticulously curated dataset designed specifically for training and evaluating lips reading models.
 This dataset comprises a vast collection of 500 words, carefully selected to represent diverse vocabulary encountered in everyday conversations.
