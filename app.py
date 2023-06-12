@@ -78,9 +78,9 @@ def preprocess_frames(frames_bytes):
     return tensor_frames
 
 
-def get_top_10_tuples(predictions_to_probabilities):
+def get_top_5_tuples(predictions_to_probabilities):
     sorted_tuples = sorted(predictions_to_probabilities, key=lambda x: x[1], reverse=True)
-    top = sorted_tuples[:10]
+    top = sorted_tuples[:5]
     return top
 
 
@@ -149,7 +149,7 @@ def predict(model_type):
     probabilities = F.softmax(predictions, dim=1)
 
     class_percentages = [(idx, p.item() * 100) for idx, p in enumerate(probabilities[0])]
-    top_10 = get_top_10_tuples(class_percentages)
+    top_10 = get_top_5_tuples(class_percentages)
     top_10_labels = map_labels(top_10, labels)
 
     json_data = json.dumps([[label, value] for label, value in top_10_labels])
