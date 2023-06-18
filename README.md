@@ -9,6 +9,7 @@ Our model excels at decoding spoken words, making it an invaluable asset for a w
 
 Join us on this journey as we unlock the potential of lips reading technology and bring words to life
 
+# Architecture 
 ![loqui-architecture](doc/readme/loqui-architecture.png)
 
 To better understand the architecture of our model, take a look at the image above. It provides an overview of the components and how they work together to enable accurate lips reading.
@@ -55,8 +56,17 @@ With our intuitive interface, anyone can effortlessly upload their video and obt
 The purpose of this UI is to showcase the effectiveness and versatility of our lip reading model in a practical setting. By allowing users to interact with the model through a user-friendly interface, we aim to promote accessibility and inclusivity, enhancing content understanding for individuals with hearing impairments and non-native speakers.
 
 Through our UI, we provide a glimpse into the future of video-based interactions, where cutting-edge AI technology enables seamless communication and understanding across diverse linguistic backgrounds.
+
 # Testing
-TODO
+To evaluate the performance of our lips reading model, we conducted extensive testing using various evaluation metrics. We assessed the model's accuracy, precision, recall, and F1 score to gauge its effectiveness in decoding spoken words.
+
+During testing, we used the LRW Dataset, which contains a diverse range of 500 words recorded in high-quality videos. We employed the pre-trained model and testing settings provided in this repository to ensure consistency and reproducibility of the results.
+
+To facilitate testing, we provide notebooks in the "notebooks/" directory, specifically the "test-single-video-production-videos.ipynb" notebook. This notebook allows you to test single images or videos, providing predictions for the spoken words based on the lip movements captured in the input.
+
+By using this notebook, you can evaluate the performance of our lips reading model on your own images or videos, gaining insights into its capabilities and potential applications.
+
+Feel free to explore the provided notebooks and conduct your own testing to witness the power of our lip reading model in action.
 
 # Installation:
 1. Install TurboJPEG: The pyturbojpeg module is a Python wrapper for the TurboJPEG library. You need to install TurboJPEG before you can install pyturbojpeg. You can download the TurboJPEG library from the official website: https://libjpeg-turbo.org/Download/
